@@ -13,6 +13,8 @@ repositories {
 }
 
 dependencies {
+    implementation("org.jetbrains.kotlinx:kotlinx-cli:0.3.3")
+
     testImplementation(kotlin("test"))
 }
 
@@ -25,5 +27,5 @@ tasks.withType<KotlinCompile>() {
 }
 
 application {
-    mainClassName = "MainKt"
+    mainClass.set("com.github.wdonahoe.rpginventory.MainKt")
 }
