@@ -2,9 +2,9 @@ package com.github.wdonahoe.rpginventory
 
 import com.github.wdonahoe.rpginventory.model.Item
 
-class Inventory {
+class Inventory(private val fileService: FileService) {
 
-    fun addItem(item: Item?) {
-
+    fun addItem(item: Item) {
+        fileService.writeToInventory(item)
     }
 }
