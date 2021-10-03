@@ -1,9 +1,11 @@
 package com.github.wdonahoe.rpginventory.commandline
 
 import kotlinx.cli.ArgType
+import kotlinx.cli.ExperimentalCli
 import kotlinx.cli.Subcommand
 import kotlinx.cli.required
 
+@ExperimentalCli
 class Export : Subcommand("export", "Export the inventory to the specified location.") {
     val path by option(ArgType.String, "out", "o").required()
 

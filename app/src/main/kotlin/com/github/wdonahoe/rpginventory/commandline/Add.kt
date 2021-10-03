@@ -5,7 +5,7 @@ import kotlinx.cli.ExperimentalCli
 import kotlinx.cli.Subcommand
 import kotlinx.cli.default
 
-@OptIn(ExperimentalCli::class)
+@ExperimentalCli
 class Add : Subcommand("add", "Add an item to the inventory") {
 
     private val itemName by argument(ArgType.String)

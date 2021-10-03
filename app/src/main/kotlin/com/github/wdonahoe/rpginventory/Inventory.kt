@@ -2,8 +2,9 @@ package com.github.wdonahoe.rpginventory
 
 import com.github.wdonahoe.rpginventory.model.Item
 import com.github.wdonahoe.rpginventory.model.plus
+import com.github.wdonahoe.rpginventory.service.InventoryFileService
 
-class Inventory(private val fileService: FileService) {
+class Inventory(private val fileService: InventoryFileService) {
 
     private val _items = fileService.readAll().condense().sortedBy { it.name }.toMutableList()
 
@@ -42,6 +43,6 @@ class Inventory(private val fileService: FileService) {
             }
         }
 
-    fun export(path: String) =
-        fileService.copyTo(path)
+    fun export(path: String) {}
+        //fileService.copyTo(path)
 }
