@@ -5,6 +5,8 @@ import com.github.wdonahoe.rpginventory.commandline.*
 import com.github.wdonahoe.rpginventory.commandline.List
 import com.github.wdonahoe.rpginventory.service.InventoryFileService
 import com.github.wdonahoe.rpginventory.service.ProfileFileService
+import com.github.wdonahoe.rpginventory.util.FileUtil
+import com.github.wdonahoe.rpginventory.util.FileUtil.toDisk
 import com.github.wdonahoe.rpginventory.view.ProfileSelection
 import com.github.wdonahoe.rpginventory.view.Prompt
 import com.yg.kotlin.inquirer.components.promptList
@@ -16,7 +18,17 @@ import java.text.DecimalFormat
 private lateinit var inventory : Inventory
 
 private val profileService by lazy {
-    ProfileService(ProfileFileService())
+    ProfileService(
+        ProfileFileService(
+            FileUtil.getTableOfContentsFile().apply {
+                createNewFile()
+            }.toDisk()
+        ) { newProfile ->
+            FileUtil.getProfileDataFolder(newProfile).apply {
+                mkdir()
+            }
+        }
+    )
 }
 
 private val prompt by lazy {
@@ -40,27 +52,41 @@ fun startInteractiveMode() {
             createNewProfile()
         }
 
-        if (profileService.profiles.size > 1){
-            val selection = prompt.selectProfile
-            if (selection.operation == ProfileSelection.Operation.CreateNewProfile) {
-                createNewProfile()
-            } else {
-                profileService.setProfile(selection.profile)
-            }
-        }
+        setInitialProfile()
+        initializeInventory()
+    }
+}
 
-        inventory = Inventory(InventoryFileService(profileService))
+fun initializeInventory() {
+    inventory = Inventory(
+        InventoryFileService(
+            FileUtil.getInventoryCsvFile(
+                profileService.currentProfile
+            ).apply {
+                createNewFile()
+            }.toDisk()
+        )
+    )
+}
+
+fun setInitialProfile() {
+    if (profileService.profiles.size > 1){
+        val selection = prompt.selectProfile
+        if (selection.operation == ProfileSelection.Operation.CreateNewProfile) {
+            createNewProfile()
+        } else {
+            profileService.setProfile(selection.profile)
+        }
+    } else {
+        profileService.useFirstProfile()
     }
 }
 
 fun createNewProfile() {
-    var profile = ""
-    while (profile.isBlank()) {
+    while (!profileService.isInitialized()) {
         println(prompt.noExistingProfileCreate)
 
-        readLine()?.also { read ->
-            profile = read
-
+        readLine()?.also { profile ->
             profileService.setProfile(profile)
         }
     }

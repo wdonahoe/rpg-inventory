@@ -23,6 +23,7 @@ dependencies {
     implementation("com.jakewharton.picnic:picnic:0.5.0")
 
     testImplementation(kotlin("test"))
+    testImplementation("org.mockito.kotlin:mockito-kotlin:3.2.0")
 }
 
 tasks.test {

@@ -7,10 +7,16 @@ class ProfileService(private val fileService: ProfileFileService) {
 
     lateinit var currentProfile : Profile
 
+    fun isInitialized() = this::currentProfile.isInitialized
+
     fun setProfile(profile: String) {
         val existingProfile = fileService.profiles.firstOrNull { it.name == profile }
 
         currentProfile = existingProfile ?: fileService.createProfile(profile)
+    }
+
+    fun useFirstProfile() {
+        currentProfile = profiles.first()
     }
 
     val profiles
