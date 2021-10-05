@@ -1,9 +1,12 @@
 package com.github.wdonahoe.rpginventory
 
 import com.github.wdonahoe.rpginventory.model.Profile
-import com.github.wdonahoe.rpginventory.service.ProfileFileService
+import com.github.wdonahoe.rpginventory.service.TableOfContentsFileService
 
-class ProfileService(private val fileService: ProfileFileService) {
+class ProfileManager(private val fileService: TableOfContentsFileService) {
+
+    val profiles
+        get() = fileService.profiles
 
     lateinit var currentProfile : Profile
 
@@ -18,7 +21,4 @@ class ProfileService(private val fileService: ProfileFileService) {
     fun useFirstProfile() {
         currentProfile = profiles.first()
     }
-
-    val profiles
-        get() = fileService.profiles
 }

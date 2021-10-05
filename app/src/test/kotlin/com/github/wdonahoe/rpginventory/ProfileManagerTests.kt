@@ -1,13 +1,13 @@
 package com.github.wdonahoe.rpginventory
 
-import com.github.wdonahoe.rpginventory.service.ProfileFileService
+import com.github.wdonahoe.rpginventory.service.TableOfContentsFileService
 import org.junit.Assert
 import org.junit.Test
 
-class ProfileServiceTests {
+class ProfileManagerTests {
 
     private val profileService
-        get() = ProfileService(ProfileFileService(TestUtil.throwawayFile) { })
+        get() = ProfileManager(TableOfContentsFileService(TestUtil.throwawayFile) { })
 
     @Test
     fun testCreate() {

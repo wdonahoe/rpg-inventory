@@ -26,11 +26,17 @@ object FileUtil {
         DiskFile(this)
 
     fun getProfileDataFolder(profile: Profile) =
-        File(rootDir, profile.folder)
+        File(rootDir, profile.folder).apply {
+            mkdir()
+        }
 
     fun getTableOfContentsFile() =
-        File(rootDir, TABLE_OF_CONTENTS)
+        File(rootDir, TABLE_OF_CONTENTS).apply {
+            createNewFile()
+        }.toDisk()
 
-    fun getInventoryCsvFile(profile: Profile) =
-        File(getProfileDataFolder(profile), INVENTORY_CSV)
+    fun getInventoryFile(profile: Profile) =
+        File(File(rootDir, profile.folder), INVENTORY_CSV).apply {
+            createNewFile()
+        }.toDisk()
 }

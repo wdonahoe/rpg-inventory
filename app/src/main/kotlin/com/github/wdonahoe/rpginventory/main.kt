@@ -3,13 +3,14 @@ package com.github.wdonahoe.rpginventory
 import com.github.ajalt.mordant.terminal.Terminal
 import com.github.wdonahoe.rpginventory.commandline.*
 import com.github.wdonahoe.rpginventory.commandline.List
+import com.github.wdonahoe.rpginventory.model.Item
 import com.github.wdonahoe.rpginventory.service.InventoryFileService
-import com.github.wdonahoe.rpginventory.service.ProfileFileService
+import com.github.wdonahoe.rpginventory.service.TableOfContentsFileService
 import com.github.wdonahoe.rpginventory.util.FileUtil
-import com.github.wdonahoe.rpginventory.util.FileUtil.toDisk
+import com.github.wdonahoe.rpginventory.view.Action
 import com.github.wdonahoe.rpginventory.view.ProfileSelection
 import com.github.wdonahoe.rpginventory.view.Prompt
-import com.yg.kotlin.inquirer.components.promptList
+import com.yg.kotlin.inquirer.components.promptInput
 import com.yg.kotlin.inquirer.core.KInquirer
 import kotlinx.cli.ArgParser
 import kotlinx.cli.ExperimentalCli
@@ -17,22 +18,17 @@ import java.text.DecimalFormat
 
 private lateinit var inventory : Inventory
 
-private val profileService by lazy {
-    ProfileService(
-        ProfileFileService(
-            FileUtil.getTableOfContentsFile().apply {
-                createNewFile()
-            }.toDisk()
-        ) { newProfile ->
-            FileUtil.getProfileDataFolder(newProfile).apply {
-                mkdir()
-            }
-        }
+private val profileManager by lazy {
+    ProfileManager(
+        TableOfContentsFileService(
+            FileUtil.getTableOfContentsFile(),
+            profileCreatedCallback = FileUtil::getProfileDataFolder
+        )
     )
 }
 
 private val prompt by lazy {
-    Prompt(profileService)
+    Prompt(profileManager)
 }
 
 @ExperimentalCli
@@ -48,48 +44,77 @@ fun startInteractiveMode() {
     with(Terminal()) {
         println(prompt.welcome)
 
-        if (profileService.profiles.none()) {
+        if (profileManager.profiles.none()) {
             createNewProfile()
         }
 
         setInitialProfile()
         initializeInventory()
+
+        do {
+            val action = prompt.primaryActions
+
+            when (action) {
+                Action.SelectNewProfile -> selectOrCreateProfile()
+                Action.AddItem          -> addItem()
+                Action.ListItems        -> listItems()
+                else -> { }
+            }
+        } while(action != Action.Exit)
     }
+}
+
+fun listItems() {
+    println(prompt.displayItems(inventory.items))
+}
+
+fun addItem() {
+    prompt.addItem.let { item ->
+        println(prompt.displayItem(item))
+
+        inventory.addItem(item)
+    }
+}
+
+fun selectOrCreateProfile() {
+    if (profileManager.profiles.size == 1) {
+        createNewProfile()
+    } else {
+        setInitialProfile()
+    }
+
+    initializeInventory()
 }
 
 fun initializeInventory() {
     inventory = Inventory(
         InventoryFileService(
-            FileUtil.getInventoryCsvFile(
-                profileService.currentProfile
-            ).apply {
-                createNewFile()
-            }.toDisk()
+            FileUtil.getInventoryFile(
+                profileManager.currentProfile
+            )
         )
     )
 }
 
 fun setInitialProfile() {
-    if (profileService.profiles.size > 1){
+    if (profileManager.profiles.size > 1){
         val selection = prompt.selectProfile
         if (selection.operation == ProfileSelection.Operation.CreateNewProfile) {
             createNewProfile()
         } else {
-            profileService.setProfile(selection.profile)
+            profileManager.setProfile(selection.profile)
         }
     } else {
-        profileService.useFirstProfile()
+        profileManager.useFirstProfile()
     }
 }
 
 fun createNewProfile() {
-    while (!profileService.isInitialized()) {
-        println(prompt.noExistingProfileCreate)
-
-        readLine()?.also { profile ->
-            profileService.setProfile(profile)
+    do {
+        KInquirer.promptInput(prompt.noExistingProfileCreate).also { profile ->
+            profileManager.setProfile(profile)
         }
-    }
+    } while (!profileManager.isInitialized())
 }
 
 @ExperimentalCli
