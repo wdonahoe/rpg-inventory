@@ -122,7 +122,7 @@ class Prompt(private val profileManager: ProfileManager) {
             header {
                 row((bold + yellow)("Name"), (bold + yellow)("Quantity"))
             }
-            row(item.name, "${item.quantity} ${item.unit}")
+            row(item.name, "${item.quantity} ${item.unit.orEmpty()}".trim())
         }.toString().prependIndent(INDENT)
 
     fun displayItems(items: List<Item>) =
@@ -137,7 +137,7 @@ class Prompt(private val profileManager: ProfileManager) {
             }
             body {
                 items.forEach {
-                    row(it.name, "${it.quantity} ${it.unit}")
+                    row(it.name, "${it.quantity} ${it.unit.orEmpty()}".trim())
                 }
             }
             footer {

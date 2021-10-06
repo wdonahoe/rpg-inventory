@@ -35,7 +35,7 @@ class Inventory(private val fileService: InventoryFileService) {
         }
     }
 
-    private fun Sequence<Item>.condense() =
+    private fun List<Item>.condense() =
         sequence {
             for (group in groupBy { it.name to it.unit }) {
                 val quantity = group.value.sumOf { it.quantity }

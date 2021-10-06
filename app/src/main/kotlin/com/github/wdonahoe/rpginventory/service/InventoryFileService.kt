@@ -17,21 +17,17 @@ class InventoryFileService(private val inventory: File) {
             )
 
     fun readAll() =
-        BufferedReader(inventory.reader).use {
+        BufferedReader(inventory.reader).use { reader ->
             CSVParser(
-                it,
+                reader,
                 CSVFormat.DEFAULT
             ).use { parser ->
-                sequence {
-                    for (record in parser) {
-                        yield(
-                            Item(
-                                name = record.get(0),
-                                quantity = record.get(1).toDouble(),
-                                unit = record.get(2)
-                            )
-                        )
-                    }
+                parser.map { record ->
+                    Item(
+                        name = record.get(0),
+                        quantity = record.get(1).toDouble(),
+                        unit = record.get(2)
+                    )
                 }
             }
         }
