@@ -1,5 +1,6 @@
 package com.github.wdonahoe.rpginventory.view
 
+import com.github.ajalt.mordant.rendering.TextColors
 import com.github.ajalt.mordant.rendering.TextColors.brightWhite
 import com.github.ajalt.mordant.rendering.TextColors.yellow
 import com.github.ajalt.mordant.rendering.TextColors.magenta
@@ -11,7 +12,6 @@ import com.github.wdonahoe.rpginventory.view.Values.ADD_ITEM
 import com.github.wdonahoe.rpginventory.view.Values.ADD_ITEM_ENTER_UNITS
 import com.github.wdonahoe.rpginventory.view.Values.ADD_ITEM_HEADER
 import com.github.wdonahoe.rpginventory.view.Values.ADD_ITEM_QUANTITY
-import com.github.wdonahoe.rpginventory.view.Values.ADD_ITEM_QUANTITY_HINT
 import com.github.wdonahoe.rpginventory.view.Values.ADD_ITEM_UNITS
 import com.github.wdonahoe.rpginventory.view.Values.CREATE_PROFILE_OPTION
 import com.github.wdonahoe.rpginventory.view.Values.CREATE_PROFILE_PROMPT
@@ -20,6 +20,8 @@ import com.github.wdonahoe.rpginventory.view.Values.INDENT
 import com.github.wdonahoe.rpginventory.view.Values.LIST_ITEMS
 import com.github.wdonahoe.rpginventory.view.Values.SELECT_PROFILE_PROMPT
 import com.github.wdonahoe.rpginventory.view.Values.SWITCH_PROFILE
+import com.github.wdonahoe.rpginventory.view.Values.TABLE_PADDING
+import com.github.wdonahoe.rpginventory.view.Values.WELCOME
 import com.jakewharton.picnic.table
 import com.yg.kotlin.inquirer.components.promptConfirm
 import com.yg.kotlin.inquirer.components.promptInput
@@ -30,7 +32,7 @@ import com.yg.kotlin.inquirer.core.KInquirer
 class Prompt(private val profileManager: ProfileManager) {
 
     val welcome by lazy {
-        (yellow + bold)(Values.WELCOME)
+        (TextColors.brightYellow + bold)(WELCOME)
     }
 
     val noExistingProfileCreate by lazy {
@@ -95,7 +97,6 @@ class Prompt(private val profileManager: ProfileManager) {
     private val addItemQuantity get() =
         KInquirer.promptInputNumber(
             ADD_ITEM_QUANTITY.prependProfile(),
-            hint = ADD_ITEM_QUANTITY_HINT,
             default = "1"
         )
 
@@ -119,7 +120,7 @@ class Prompt(private val profileManager: ProfileManager) {
                 paddingRight = paddingLeft
             }
             header {
-                row("Name", "Quantity")
+                row((bold + yellow)("Name"), (bold + yellow)("Quantity"))
             }
             row(item.name, "${item.quantity} ${item.unit}")
         }.toString().prependIndent(INDENT)
@@ -128,20 +129,20 @@ class Prompt(private val profileManager: ProfileManager) {
         table {
             cellStyle {
                 border = true
-                paddingLeft = 2
-                paddingRight = paddingLeft
+                paddingLeft = TABLE_PADDING
+                paddingRight = TABLE_PADDING
             }
             header {
-                row(bold("Name"), bold("Quantity"))
+                row((bold + yellow)("Name"), (bold + yellow)("Quantity"))
             }
             body {
-                for (item in items) {
-                    row(item.name, "${item.quantity} ${item.unit}")
+                items.forEach {
+                    row(it.name, "${it.quantity} ${it.unit}")
                 }
             }
             footer {
                 row {
-                    cell(bold("Total: ${items.size}")) {
+                    cell(bold("Total Items: ${items.size}")) {
                         columnSpan = 2
                     }
                 }

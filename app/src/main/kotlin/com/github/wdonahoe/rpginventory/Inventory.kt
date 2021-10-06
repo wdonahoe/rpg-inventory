@@ -17,6 +17,8 @@ class Inventory(private val fileService: InventoryFileService) {
 
         if (existingIndex != -1) {
             _items[existingIndex] += item
+        } else {
+            _items.add(item)
         }
 
         fileService.writeToInventory(item)

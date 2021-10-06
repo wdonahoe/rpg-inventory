@@ -16,6 +16,8 @@ import kotlinx.cli.ArgParser
 import kotlinx.cli.ExperimentalCli
 import java.text.DecimalFormat
 
+private val terminal = Terminal()
+
 private lateinit var inventory : Inventory
 
 private val profileManager by lazy {
@@ -41,7 +43,7 @@ fun main(args: Array<String>) {
 }
 
 fun startInteractiveMode() {
-    with(Terminal()) {
+    with(terminal) {
         println(prompt.welcome)
 
         if (profileManager.profiles.none()) {
@@ -65,12 +67,12 @@ fun startInteractiveMode() {
 }
 
 fun listItems() {
-    println(prompt.displayItems(inventory.items))
+    terminal.println(prompt.displayItems(inventory.items))
 }
 
 fun addItem() {
     prompt.addItem.let { item ->
-        println(prompt.displayItem(item))
+        terminal.println(prompt.displayItem(item))
 
         inventory.addItem(item)
     }

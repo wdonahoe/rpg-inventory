@@ -19,7 +19,7 @@ object Values {
     const val ADD_ITEM_UNITS = "Does it have a unit? (e.g. ounce, gram etc.)"
     const val ADD_ITEM_ENTER_UNITS = "Enter the unit:"
     const val ADD_ITEM_QUANTITY = "How many?"
-    const val ADD_ITEM_QUANTITY_HINT = "press enter for just one"
 
+    const val TABLE_PADDING = 2
     const val INDENT = "  "
 }

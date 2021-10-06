@@ -1,7 +1,7 @@
 Welcome to RPG Inventory!
-?  Select an action:  
+? (Michael Gray) Select an action:  
  ?  1) Add an item
     2) Display items
     3) Switch to a different profile
-    4)  ExitOct 04, 2021 8:14:10 PM org.jline.utils.Log logr
+    4) ExitOct 05, 2021 9:54:06 PM org.jline.utils.Log logr
 WARNING: Unable to create a system terminal, creating a dumb terminal (enable debug logging for more information)
