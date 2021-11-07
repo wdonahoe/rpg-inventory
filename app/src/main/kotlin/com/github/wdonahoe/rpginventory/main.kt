@@ -59,6 +59,8 @@ fun startInteractiveMode() {
             when (action) {
                 Action.SelectNewProfile -> selectOrCreateProfile()
                 Action.AddItem          -> addItem()
+                Action.AddRecipe        -> addRecipe()
+                Action.RemoveItem       -> removeItems()
                 Action.ListItems        -> listItems()
                 else -> { }
             }
@@ -66,12 +68,25 @@ fun startInteractiveMode() {
     }
 }
 
+fun addRecipe() {
+    val recipe = prompt.addRecipe()
+
+    terminal.println(recipe.first)
+    terminal.println(prompt.displayItems(recipe.second))
+}
+
+fun removeItems() {
+    val toRemove = prompt.removeItems(inventory.items)
+
+    inventory.removeAllItems(toRemove)
+}
+
 fun listItems() {
     terminal.println(prompt.displayItems(inventory.items))
 }
 
 fun addItem() {
-    prompt.addItem.let { item ->
+    prompt.addItem().let { item ->
         terminal.println(prompt.displayItem(item))
 
         inventory.addItem(item)

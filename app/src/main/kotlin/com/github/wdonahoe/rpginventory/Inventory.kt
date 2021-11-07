@@ -6,7 +6,7 @@ import com.github.wdonahoe.rpginventory.service.InventoryFileService
 
 class Inventory(private val fileService: InventoryFileService) {
 
-    private val _items = fileService.readAll().condense().sortedBy { it.name }.toMutableList()
+    private val _items = fileService.readAll().sortedBy { it.name }.toMutableList()
 
     val items : List<Item> get() = _items
 
@@ -21,7 +21,7 @@ class Inventory(private val fileService: InventoryFileService) {
             _items.add(item)
         }
 
-        fileService.writeToInventory(item)
+        fileService.writeItems(items)
     }
 
     fun clear(): Boolean {
@@ -35,16 +35,11 @@ class Inventory(private val fileService: InventoryFileService) {
         }
     }
 
-    private fun List<Item>.condense() =
-        sequence {
-            for (group in groupBy { it.name to it.unit }) {
-                val quantity = group.value.sumOf { it.quantity }
-                val unit = group.value.lastOrNull { it.unit != null && it.unit.isNotEmpty() }?.unit
-
-                yield(Item(group.key.first, quantity, unit))
-            }
-        }
-
     fun export(path: String) {}
-        //fileService.copyTo(path)
+
+    fun removeAllItems(toRemove: List<String>) {
+        _items.removeAll { toRemove.contains(it.name) }
+
+        fileService.writeItems(items)
+    }
 }

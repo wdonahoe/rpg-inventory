@@ -7,7 +7,7 @@ import java.io.Writer
 internal object TestUtil {
 
     internal class ThrowawayFile : File {
-        override val writer = object : Writer() {
+        override fun getWriter(append: Boolean) = object : Writer() {
             override fun close() {
             }
             override fun flush() {

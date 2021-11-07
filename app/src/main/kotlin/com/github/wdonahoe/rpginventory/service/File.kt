@@ -4,6 +4,6 @@ import java.io.Reader
 import java.io.Writer
 
 interface File {
-    val writer: Writer
+    fun getWriter(append: Boolean): Writer
     val reader: Reader
 }

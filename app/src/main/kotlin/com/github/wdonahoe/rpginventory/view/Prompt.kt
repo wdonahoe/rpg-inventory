@@ -8,25 +8,28 @@ import com.github.ajalt.mordant.rendering.TextStyles.bold
 import com.github.wdonahoe.rpginventory.ProfileManager
 import com.github.wdonahoe.rpginventory.model.Item
 import com.github.wdonahoe.rpginventory.view.Values.ACTIONS_HEADER
+import com.github.wdonahoe.rpginventory.view.Values.ADD_INGREDIENT
+import com.github.wdonahoe.rpginventory.view.Values.ADD_INITIAL_INGREDIENT
 import com.github.wdonahoe.rpginventory.view.Values.ADD_ITEM
 import com.github.wdonahoe.rpginventory.view.Values.ADD_ITEM_ENTER_UNITS
 import com.github.wdonahoe.rpginventory.view.Values.ADD_ITEM_HEADER
+import com.github.wdonahoe.rpginventory.view.Values.ADD_ITEM_HINT
 import com.github.wdonahoe.rpginventory.view.Values.ADD_ITEM_QUANTITY
 import com.github.wdonahoe.rpginventory.view.Values.ADD_ITEM_UNITS
+import com.github.wdonahoe.rpginventory.view.Values.ADD_RECIPE
+import com.github.wdonahoe.rpginventory.view.Values.ADD_RECIPE_HEADER
 import com.github.wdonahoe.rpginventory.view.Values.CREATE_PROFILE_OPTION
 import com.github.wdonahoe.rpginventory.view.Values.CREATE_PROFILE_PROMPT
 import com.github.wdonahoe.rpginventory.view.Values.EXIT
 import com.github.wdonahoe.rpginventory.view.Values.INDENT
 import com.github.wdonahoe.rpginventory.view.Values.LIST_ITEMS
+import com.github.wdonahoe.rpginventory.view.Values.REMOVE_ITEMS
 import com.github.wdonahoe.rpginventory.view.Values.SELECT_PROFILE_PROMPT
 import com.github.wdonahoe.rpginventory.view.Values.SWITCH_PROFILE
 import com.github.wdonahoe.rpginventory.view.Values.TABLE_PADDING
 import com.github.wdonahoe.rpginventory.view.Values.WELCOME
 import com.jakewharton.picnic.table
-import com.yg.kotlin.inquirer.components.promptConfirm
-import com.yg.kotlin.inquirer.components.promptInput
-import com.yg.kotlin.inquirer.components.promptInputNumber
-import com.yg.kotlin.inquirer.components.promptList
+import com.yg.kotlin.inquirer.components.*
 import com.yg.kotlin.inquirer.core.KInquirer
 
 class Prompt(private val profileManager: ProfileManager) {
@@ -63,6 +66,8 @@ class Prompt(private val profileManager: ProfileManager) {
             ACTIONS_HEADER.prependProfile(),
             listOf(
                 ADD_ITEM,
+                ADD_RECIPE,
+                REMOVE_ITEMS,
                 LIST_ITEMS,
                 SWITCH_PROFILE,
                 EXIT
@@ -72,15 +77,19 @@ class Prompt(private val profileManager: ProfileManager) {
         ).run {
             when(split(")")[1].trim()) {
                 ADD_ITEM -> Action.AddItem
+                ADD_RECIPE -> Action.AddRecipe
+                REMOVE_ITEMS -> Action.RemoveItem
                 LIST_ITEMS -> Action.ListItems
                 SWITCH_PROFILE -> Action.SelectNewProfile
                 else -> Action.Exit
             }
         }
 
-    private val addItemName get() =
+    private fun addItemName(prompt: String) =
         KInquirer.promptInput(
-            ADD_ITEM_HEADER.prependProfile()
+            prompt.prependProfile(),
+            validation = String::isNotBlank,
+            hint = ADD_ITEM_HINT
         ).trim()
 
     private val addItemHasUnit get() =
@@ -100,8 +109,8 @@ class Prompt(private val profileManager: ProfileManager) {
             default = "1"
         )
 
-    val addItem get() =
-        addItemName.let { itemName ->
+    fun addItem(prompt: String = ADD_ITEM_HEADER) =
+        addItemName(prompt).let { itemName ->
             addItemHasUnit.let { hasUnit ->
                 if (hasUnit) {
                     val unit = addItemUnit
@@ -111,6 +120,51 @@ class Prompt(private val profileManager: ProfileManager) {
                 }
             }
         }
+
+    private val addRecipeName get() =
+        KInquirer.promptInput(
+            ADD_RECIPE_HEADER.prependProfile(),
+            validation = String::isNotBlank,
+            hint = ADD_ITEM_HINT
+        ).trim()
+
+    private val promptAddIngredientOrFinish get() =
+        KInquirer.promptList(
+            "What would you like to do?",
+            listOf(
+                "Add an additional ingredient",
+                "Finish the recipe"
+            )
+        ).run {
+            when(this) {
+                "Add an additional ingredient" -> Action.AddItem
+                else -> Action.FinishRecipe
+            }
+        }
+
+    fun addRecipe() =
+        addRecipeName.let { recipeName ->
+            val ingredients = mutableListOf(addItem(ADD_INITIAL_INGREDIENT))
+
+            do {
+                val action = promptAddIngredientOrFinish
+
+                if (action == Action.AddItem) {
+                    ingredients.add(addItem(ADD_INGREDIENT))
+                }
+            } while(action != Action.FinishRecipe)
+
+            recipeName to ingredients
+        }
+
+    private fun removeOneOrMoreItems(items: List<Item>) =
+        KInquirer.promptListMulti(
+            "Select the item(s) you wish to remove".prependProfile(),
+            items.map { it.name },
+        )
+
+    fun removeItems(items: List<Item>) =
+        removeOneOrMoreItems(items) // TODO: if only one result, specify quantity to remove
 
     fun displayItem(item: Item) =
         table {

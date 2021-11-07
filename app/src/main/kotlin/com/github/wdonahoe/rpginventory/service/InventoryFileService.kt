@@ -12,7 +12,7 @@ class InventoryFileService(private val inventory: File) {
     private val csvPrinter
         get() =
             CSVPrinter(
-                BufferedWriter(inventory.writer),
+                BufferedWriter(inventory.getWriter(append = false)),
                 CSVFormat.DEFAULT
             )
 
@@ -36,9 +36,12 @@ class InventoryFileService(private val inventory: File) {
         //Files.newBufferedWriter(inventory.reader, StandardOpenOption.TRUNCATE_EXISTING).use {  }
     }
 
-    fun writeToInventory(item: Item) {
+    fun writeItems(items: List<Item>) {
         csvPrinter.use { printer ->
-            printer.printRecord(item.name, item.quantity, item.unit)
+            items.forEach { item ->
+                printer.printRecord(item.name, item.quantity, item.unit)
+            }
+
             printer.flush()
         }
     }

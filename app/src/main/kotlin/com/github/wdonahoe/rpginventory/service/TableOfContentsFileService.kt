@@ -18,7 +18,7 @@ class TableOfContentsFileService(
     private val csvPrinter
         get() =
             CSVPrinter(
-                BufferedWriter(tableOfContents.writer),
+                BufferedWriter(tableOfContents.getWriter(append = true)),
                 CSVFormat.DEFAULT
             )
 
