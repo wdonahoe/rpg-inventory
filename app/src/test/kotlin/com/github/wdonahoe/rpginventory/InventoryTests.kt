@@ -1,18 +1,21 @@
 package com.github.wdonahoe.rpginventory
 
 import com.github.wdonahoe.rpginventory.model.Item
+import com.github.wdonahoe.rpginventory.model.Recipe
 import com.github.wdonahoe.rpginventory.service.InventoryFileService
+import com.github.wdonahoe.rpginventory.service.RecipeFileService
 import org.junit.Assert
 import org.junit.Test
 
 class InventoryTests {
     private val inventory
-        get() = Inventory(InventoryFileService(TestUtil.throwawayFile))
+        get() = Inventory(InventoryFileService(TestUtil.throwawayFile), RecipeFileService(TestUtil.throwawayFile))
 
     @Test
     fun testCreate() {
         with(inventory) {
             Assert.assertEquals(items.size, 0)
+            Assert.assertEquals(recipes.size, 0)
         }
     }
 
@@ -64,6 +67,34 @@ class InventoryTests {
                 Assert.assertEquals(quantity, 2.0, 0.0)
                 Assert.assertEquals(unit, "lb")
             }
+        }
+    }
+
+    @Test
+    fun testAddRecipe() {
+        with(inventory) {
+            addRecipe(
+                Recipe(
+                    "test",
+                    listOf(
+                        Item(
+                            "ingredient 1",
+                            1.0,
+                            "oz"
+                        ),
+                        Item(
+                            "ingredient 2",
+                            2.0,
+                            null
+                        )
+                    )
+                )
+            )
+
+            Assert.assertEquals(recipes.size, 1)
+
+            Assert.assertEquals(recipes[0].ingredients[0].name, "ingredient 1")
+            Assert.assertEquals(recipes[0].ingredients[1].name, "ingredient 2")
         }
     }
 }
