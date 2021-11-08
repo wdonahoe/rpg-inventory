@@ -11,7 +11,7 @@ object Values {
 
     const val ACTIONS_HEADER = "Select an action:"
     const val ADD_ITEM = "Add an item"
-    const val ADD_RECIPE = "Add an item recipe"
+    const val ADD_RECIPE = "Add a recipe"
     const val REMOVE_ITEMS = "Remove items"
     const val LIST_ITEMS = "Display items"
     const val SWITCH_PROFILE = "Switch to a different profile"

@@ -3,8 +3,9 @@ package com.github.wdonahoe.rpginventory
 import com.github.ajalt.mordant.terminal.Terminal
 import com.github.wdonahoe.rpginventory.commandline.*
 import com.github.wdonahoe.rpginventory.commandline.List
-import com.github.wdonahoe.rpginventory.model.Item
+import com.github.wdonahoe.rpginventory.model.Recipe
 import com.github.wdonahoe.rpginventory.service.InventoryFileService
+import com.github.wdonahoe.rpginventory.service.RecipeFileService
 import com.github.wdonahoe.rpginventory.service.TableOfContentsFileService
 import com.github.wdonahoe.rpginventory.util.FileUtil
 import com.github.wdonahoe.rpginventory.view.Action
@@ -69,10 +70,13 @@ fun startInteractiveMode() {
 }
 
 fun addRecipe() {
-    val recipe = prompt.addRecipe()
+    prompt.addRecipe().let { (recipe, ingredients) ->
 
-    terminal.println(recipe.first)
-    terminal.println(prompt.displayItems(recipe.second))
+        inventory.addRecipe(Recipe(recipe, ingredients))
+
+        terminal.println(recipe)
+        terminal.println(prompt.displayItems(ingredients))
+    }
 }
 
 fun removeItems() {
@@ -107,6 +111,11 @@ fun initializeInventory() {
     inventory = Inventory(
         InventoryFileService(
             FileUtil.getInventoryFile(
+                profileManager.currentProfile
+            )
+        ),
+        RecipeFileService(
+            FileUtil.getRecipeFile(
                 profileManager.currentProfile
             )
         )

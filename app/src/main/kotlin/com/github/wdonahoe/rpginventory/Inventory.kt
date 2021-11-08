@@ -1,14 +1,21 @@
 package com.github.wdonahoe.rpginventory
 
 import com.github.wdonahoe.rpginventory.model.Item
+import com.github.wdonahoe.rpginventory.model.Recipe
 import com.github.wdonahoe.rpginventory.model.plus
 import com.github.wdonahoe.rpginventory.service.InventoryFileService
+import com.github.wdonahoe.rpginventory.service.RecipeFileService
 
-class Inventory(private val fileService: InventoryFileService) {
+class Inventory(
+    private val inventoryService: InventoryFileService,
+    private val recipeService: RecipeFileService
+) {
 
-    private val _items = fileService.readAll().sortedBy { it.name }.toMutableList()
+    private val _recipes = recipeService.readAll().sortedBy { it.itemName }.toMutableList()
+    private val _items = inventoryService.readAll().sortedBy { it.name }.toMutableList()
 
     val items : List<Item> get() = _items
+    val recipes : List<Recipe> get() = _recipes
 
     fun addItem(item: Item) {
         val existingIndex = items.indexOfFirst {
@@ -21,14 +28,20 @@ class Inventory(private val fileService: InventoryFileService) {
             _items.add(item)
         }
 
-        fileService.writeItems(items)
+        inventoryService.writeItems(items)
+    }
+
+    fun addRecipe(recipe: Recipe) {
+        _recipes.add(recipe)
+
+        recipeService.writeRecipes(_recipes)
     }
 
     fun clear(): Boolean {
         _items.clear()
 
         return try {
-            fileService.clearInventory()
+            inventoryService.clearInventory()
             true
         } catch (ex: Exception) {
             false
@@ -40,6 +53,6 @@ class Inventory(private val fileService: InventoryFileService) {
     fun removeAllItems(toRemove: List<String>) {
         _items.removeAll { toRemove.contains(it.name) }
 
-        fileService.writeItems(items)
+        inventoryService.writeItems(items)
     }
 }

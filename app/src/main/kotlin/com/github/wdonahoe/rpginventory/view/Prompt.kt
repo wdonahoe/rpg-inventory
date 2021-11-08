@@ -130,7 +130,7 @@ class Prompt(private val profileManager: ProfileManager) {
 
     private val promptAddIngredientOrFinish get() =
         KInquirer.promptList(
-            "What would you like to do?",
+            "What would you like to do?".prependProfile(),
             listOf(
                 "Add an additional ingredient",
                 "Finish the recipe"

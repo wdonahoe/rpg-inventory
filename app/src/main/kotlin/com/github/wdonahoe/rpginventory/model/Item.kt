@@ -1,5 +1,8 @@
 package com.github.wdonahoe.rpginventory.model
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class Item(
     val name: String,
     val quantity: Double,
