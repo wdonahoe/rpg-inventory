@@ -3,6 +3,7 @@ package com.github.wdonahoe.rpginventory
 import com.github.ajalt.mordant.terminal.Terminal
 import com.github.wdonahoe.rpginventory.commandline.*
 import com.github.wdonahoe.rpginventory.commandline.List
+import com.github.wdonahoe.rpginventory.model.Item
 import com.github.wdonahoe.rpginventory.model.Recipe
 import com.github.wdonahoe.rpginventory.service.InventoryFileService
 import com.github.wdonahoe.rpginventory.service.RecipeFileService
@@ -71,7 +72,16 @@ fun startInteractiveMode() {
 }
 
 fun craftItem() {
-    prompt.craftRecipe(inventory.recipes)
+    prompt.craftRecipe(inventory.recipes)?.let { recipe ->
+        inventory.removeItems(recipe.ingredients)
+
+        inventory.addItem(
+            Item(
+                recipe.itemName,
+                1.0,
+                null)
+        )
+    }
 }
 
 fun addRecipe() {

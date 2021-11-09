@@ -12,7 +12,7 @@ class Inventory(
     private val recipeService: RecipeFileService
 ) {
 
-    private val _items =
+    private var _items =
         inventoryService
             .readAll()
             .sortedBy { it.name }
@@ -33,7 +33,7 @@ class Inventory(
 
     fun addItem(item: Item) {
         val existingIndex = items.indexOfFirst {
-            it.name.equals(item.name, ignoreCase = true) && it.unit?.equals(item.unit) == true
+            it.name.equals(item.name, ignoreCase = true) && (it.unit == null || it.unit == item.unit)
         }
 
         if (existingIndex != -1) {
@@ -90,6 +90,21 @@ class Inventory(
 
     fun removeAllItems(toRemove: List<String>) {
         _items.removeAll { toRemove.contains(it.name) }
+
+        inventoryService.writeItems(items)
+    }
+
+    fun removeItems(toRemove: List<Item>) {
+        for (item in toRemove) {
+            val toUpdate = items.first { it.name == item.name }
+            toUpdate.quantity -= item.quantity
+
+            if (toUpdate.quantity <= 0.0) {
+                _items.remove(toUpdate)
+            }
+        }
+
+        _recipes = _recipes.map { getRecipeStatus(it.recipe) }.toMutableList()
 
         inventoryService.writeItems(items)
     }

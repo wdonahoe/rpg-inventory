@@ -4,5 +4,5 @@ data class RecipeStatus(
     val recipe: Recipe,
     val missingIngredients: List<Pair<Item, Double>>
 ) {
-    val canCraft = missingIngredients.none()
+    val canCraft = missingIngredients.all { (_, quantity) -> quantity <= 0.0 }
 }
