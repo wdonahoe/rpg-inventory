@@ -1,7 +1,7 @@
 package com.github.wdonahoe.rpginventory.view
 
 object Values {
-    const val APP_NAME = "RPG Inventory"
+    private const val APP_NAME = "RPG Inventory"
 
     const val WELCOME = "Welcome to $APP_NAME!"
 
@@ -16,6 +16,7 @@ object Values {
     const val LIST_ITEMS = "Display items"
     const val SWITCH_PROFILE = "Switch to a different profile"
     const val EXIT = "Exit"
+    const val CANCEL = "Cancel"
 
     const val ADD_ITEM_HEADER = "What is the name of the item?"
     const val ADD_ITEM_HINT = "type the name"
@@ -26,6 +27,10 @@ object Values {
     const val ADD_RECIPE_HEADER = "What is the name of the item created by the recipe?"
     const val ADD_INITIAL_INGREDIENT = "What is the first ingredient?"
     const val ADD_INGREDIENT = "What is the name of the ingredient?"
+    const val ADD_ADDITIONAL_INGREDIENT = "Add an additional ingredient"
+    const val FINISH_RECIPE = "Finish the recipe"
+
+    const val CRAFT_ITEM = "Craft an item."
 
     const val TABLE_PADDING = 2
     const val INDENT = "  "

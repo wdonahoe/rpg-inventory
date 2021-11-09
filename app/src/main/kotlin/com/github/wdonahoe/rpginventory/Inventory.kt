@@ -2,6 +2,7 @@ package com.github.wdonahoe.rpginventory
 
 import com.github.wdonahoe.rpginventory.model.Item
 import com.github.wdonahoe.rpginventory.model.Recipe
+import com.github.wdonahoe.rpginventory.model.RecipeStatus
 import com.github.wdonahoe.rpginventory.model.plus
 import com.github.wdonahoe.rpginventory.service.InventoryFileService
 import com.github.wdonahoe.rpginventory.service.RecipeFileService
@@ -11,11 +12,24 @@ class Inventory(
     private val recipeService: RecipeFileService
 ) {
 
-    private val _recipes = recipeService.readAll().sortedBy { it.itemName }.toMutableList()
-    private val _items = inventoryService.readAll().sortedBy { it.name }.toMutableList()
+    private val _items =
+        inventoryService
+            .readAll()
+            .sortedBy { it.name }
+            .toMutableList()
 
-    val items : List<Item> get() = _items
-    val recipes : List<Recipe> get() = _recipes
+    private var _recipes =
+        recipeService
+            .readAll()
+            .map(::getRecipeStatus)
+            .sortedBy { it.recipe.itemName }
+            .toMutableList()
+
+    val items : List<Item>
+        get() = _items
+
+    val recipes : List<RecipeStatus>
+        get() = _recipes
 
     fun addItem(item: Item) {
         val existingIndex = items.indexOfFirst {
@@ -28,14 +42,38 @@ class Inventory(
             _items.add(item)
         }
 
+        _recipes = _recipes.map { getRecipeStatus(it.recipe) }.toMutableList()
+
         inventoryService.writeItems(items)
     }
 
     fun addRecipe(recipe: Recipe) {
-        _recipes.add(recipe)
+        _recipes.add(getRecipeStatus(recipe))
 
-        recipeService.writeRecipes(_recipes)
+        recipeService.writeRecipes(_recipes.map { it.recipe })
     }
+
+    private fun getRecipeStatus(recipe: Recipe) =
+        RecipeStatus(
+            recipe,
+            recipe
+                .ingredients
+                .map {
+                    it to getIngredientQuantityRemaining(it)
+                }
+                .filter { (_, quantityRemaining) ->
+                    quantityRemaining != 0.0
+                }
+        )
+
+    private fun getIngredientQuantityRemaining(ingredient: Item) =
+        items.firstOrNull { it.name == ingredient.name }.let { item ->
+            if (item == null) {
+                ingredient.quantity
+            } else {
+                ingredient.quantity - item.quantity
+            }
+        }
 
     fun clear(): Boolean {
         _items.clear()

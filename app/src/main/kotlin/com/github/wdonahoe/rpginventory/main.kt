@@ -60,6 +60,7 @@ fun startInteractiveMode() {
             when (action) {
                 Action.SelectNewProfile -> selectOrCreateProfile()
                 Action.AddItem          -> addItem()
+                Action.CraftItem        -> craftItem()
                 Action.AddRecipe        -> addRecipe()
                 Action.RemoveItem       -> removeItems()
                 Action.ListItems        -> listItems()
@@ -69,13 +70,17 @@ fun startInteractiveMode() {
     }
 }
 
+fun craftItem() {
+    prompt.craftRecipe(inventory.recipes)
+}
+
 fun addRecipe() {
-    prompt.addRecipe().let { (recipe, ingredients) ->
+    prompt.addRecipe().let { recipe ->
 
-        inventory.addRecipe(Recipe(recipe, ingredients))
+        inventory.addRecipe(recipe)
 
-        terminal.println(recipe)
-        terminal.println(prompt.displayItems(ingredients))
+        terminal.println(recipe.itemName)
+        terminal.println(prompt.displayItems(recipe.ingredients))
     }
 }
 
@@ -124,7 +129,7 @@ fun initializeInventory() {
 
 fun setInitialProfile() {
     if (profileManager.profiles.size > 1){
-        val selection = prompt.selectProfile
+        val selection = prompt.selectProfile()
         if (selection.operation == ProfileSelection.Operation.CreateNewProfile) {
             createNewProfile()
         } else {

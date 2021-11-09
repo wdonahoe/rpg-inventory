@@ -1,13 +1,13 @@
 package com.github.wdonahoe.rpginventory.view
 
-import com.github.ajalt.mordant.rendering.TextColors
-import com.github.ajalt.mordant.rendering.TextColors.brightWhite
-import com.github.ajalt.mordant.rendering.TextColors.yellow
-import com.github.ajalt.mordant.rendering.TextColors.magenta
+import com.github.ajalt.mordant.rendering.TextColors.*
 import com.github.ajalt.mordant.rendering.TextStyles.bold
 import com.github.wdonahoe.rpginventory.ProfileManager
 import com.github.wdonahoe.rpginventory.model.Item
+import com.github.wdonahoe.rpginventory.model.Recipe
+import com.github.wdonahoe.rpginventory.model.RecipeStatus
 import com.github.wdonahoe.rpginventory.view.Values.ACTIONS_HEADER
+import com.github.wdonahoe.rpginventory.view.Values.ADD_ADDITIONAL_INGREDIENT
 import com.github.wdonahoe.rpginventory.view.Values.ADD_INGREDIENT
 import com.github.wdonahoe.rpginventory.view.Values.ADD_INITIAL_INGREDIENT
 import com.github.wdonahoe.rpginventory.view.Values.ADD_ITEM
@@ -18,9 +18,12 @@ import com.github.wdonahoe.rpginventory.view.Values.ADD_ITEM_QUANTITY
 import com.github.wdonahoe.rpginventory.view.Values.ADD_ITEM_UNITS
 import com.github.wdonahoe.rpginventory.view.Values.ADD_RECIPE
 import com.github.wdonahoe.rpginventory.view.Values.ADD_RECIPE_HEADER
+import com.github.wdonahoe.rpginventory.view.Values.CANCEL
+import com.github.wdonahoe.rpginventory.view.Values.CRAFT_ITEM
 import com.github.wdonahoe.rpginventory.view.Values.CREATE_PROFILE_OPTION
 import com.github.wdonahoe.rpginventory.view.Values.CREATE_PROFILE_PROMPT
 import com.github.wdonahoe.rpginventory.view.Values.EXIT
+import com.github.wdonahoe.rpginventory.view.Values.FINISH_RECIPE
 import com.github.wdonahoe.rpginventory.view.Values.INDENT
 import com.github.wdonahoe.rpginventory.view.Values.LIST_ITEMS
 import com.github.wdonahoe.rpginventory.view.Values.REMOVE_ITEMS
@@ -35,14 +38,14 @@ import com.yg.kotlin.inquirer.core.KInquirer
 class Prompt(private val profileManager: ProfileManager) {
 
     val welcome by lazy {
-        (TextColors.brightYellow + bold)(WELCOME)
+        (brightYellow + bold)(WELCOME)
     }
 
     val noExistingProfileCreate by lazy {
         (brightWhite + bold)(CREATE_PROFILE_PROMPT)
     }
 
-    val selectProfile get() =
+    fun selectProfile() =
         KInquirer.promptList(
             SELECT_PROFILE_PROMPT.apply {
                 if (profileManager.isInitialized()) {
@@ -67,6 +70,7 @@ class Prompt(private val profileManager: ProfileManager) {
             listOf(
                 ADD_ITEM,
                 ADD_RECIPE,
+                CRAFT_ITEM,
                 REMOVE_ITEMS,
                 LIST_ITEMS,
                 SWITCH_PROFILE,
@@ -78,6 +82,7 @@ class Prompt(private val profileManager: ProfileManager) {
             when(split(")")[1].trim()) {
                 ADD_ITEM -> Action.AddItem
                 ADD_RECIPE -> Action.AddRecipe
+                CRAFT_ITEM -> Action.CraftItem
                 REMOVE_ITEMS -> Action.RemoveItem
                 LIST_ITEMS -> Action.ListItems
                 SWITCH_PROFILE -> Action.SelectNewProfile
@@ -130,17 +135,44 @@ class Prompt(private val profileManager: ProfileManager) {
 
     private val promptAddIngredientOrFinish get() =
         KInquirer.promptList(
-            "What would you like to do?".prependProfile(),
+            ACTIONS_HEADER.prependProfile(),
             listOf(
-                "Add an additional ingredient",
-                "Finish the recipe"
+                ADD_ADDITIONAL_INGREDIENT,
+                FINISH_RECIPE
             )
         ).run {
             when(this) {
-                "Add an additional ingredient" -> Action.AddItem
+                ADD_ADDITIONAL_INGREDIENT -> Action.AddItem
                 else -> Action.FinishRecipe
             }
         }
+
+    fun craftRecipe(recipes: List<RecipeStatus>) =
+        selectRecipe(recipes)?.let { recipeStatus ->
+            if (recipeStatus.canCraft) {
+                recipeStatus.recipe
+            } else {
+                null
+            }
+        }
+
+    private fun selectRecipe(recipes: List<RecipeStatus>) : RecipeStatus? {
+        val colorMap = recipes.associateBy({ colorRecipeSelection(it) }, { it })
+
+        val selection = KInquirer.promptList(
+            "Please select a recipe to craft".prependProfile(),
+            colorMap.keys.toList() + CANCEL
+        )
+
+        return colorMap[selection]
+    }
+
+    private fun colorRecipeSelection(recipe: RecipeStatus) =
+        if (recipe.canCraft) {
+            green
+        } else {
+            brightRed
+        }(recipe.recipe.itemName)
 
     fun addRecipe() =
         addRecipeName.let { recipeName ->
@@ -154,7 +186,7 @@ class Prompt(private val profileManager: ProfileManager) {
                 }
             } while(action != Action.FinishRecipe)
 
-            recipeName to ingredients
+            Recipe(recipeName, ingredients)
         }
 
     private fun removeOneOrMoreItems(items: List<Item>) =

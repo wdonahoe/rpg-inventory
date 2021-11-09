@@ -93,8 +93,8 @@ class InventoryTests {
 
             Assert.assertEquals(recipes.size, 1)
 
-            Assert.assertEquals(recipes[0].ingredients[0].name, "ingredient 1")
-            Assert.assertEquals(recipes[0].ingredients[1].name, "ingredient 2")
+            Assert.assertEquals(recipes[0].recipe.ingredients[0].name, "ingredient 1")
+            Assert.assertEquals(recipes[0].recipe.ingredients[1].name, "ingredient 2")
         }
     }
 }
