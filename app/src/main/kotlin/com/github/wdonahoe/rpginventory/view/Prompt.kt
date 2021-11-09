@@ -2,6 +2,7 @@ package com.github.wdonahoe.rpginventory.view
 
 import com.github.ajalt.mordant.rendering.TextColors.*
 import com.github.ajalt.mordant.rendering.TextStyles.bold
+import com.github.wdonahoe.rpginventory.Inventory
 import com.github.wdonahoe.rpginventory.ProfileManager
 import com.github.wdonahoe.rpginventory.model.Item
 import com.github.wdonahoe.rpginventory.model.Recipe
@@ -31,6 +32,7 @@ import com.github.wdonahoe.rpginventory.view.Values.SELECT_PROFILE_PROMPT
 import com.github.wdonahoe.rpginventory.view.Values.SWITCH_PROFILE
 import com.github.wdonahoe.rpginventory.view.Values.TABLE_PADDING
 import com.github.wdonahoe.rpginventory.view.Values.WELCOME
+import com.jakewharton.picnic.TableSectionDsl
 import com.jakewharton.picnic.table
 import com.yg.kotlin.inquirer.components.*
 import com.yg.kotlin.inquirer.core.KInquirer
@@ -110,15 +112,17 @@ class Prompt(private val profileManager: ProfileManager) {
 
     private val addItemQuantity get() =
         KInquirer.promptInputNumber(
-            ADD_ITEM_QUANTITY.prependProfile(),
-            default = "1"
+            ADD_ITEM_QUANTITY.prependProfile()
         )
 
-    fun addItem(prompt: String = ADD_ITEM_HEADER) =
+    fun addItem(inventory: Inventory, prompt: String = ADD_ITEM_HEADER) =
         addItemName(prompt).let { itemName ->
-            addItemHasUnit.let { hasUnit ->
+            val existingUnit = inventory.getUnit(itemName)
+
+            (if (existingUnit != null) true else addItemHasUnit).let { hasUnit ->
                 if (hasUnit) {
-                    val unit = addItemUnit
+                    val unit = existingUnit ?: addItemUnit
+
                     Item(itemName, addItemQuantity.toDouble(), unit)
                 } else {
                     Item(itemName, addItemQuantity.toDouble(), "")
@@ -147,14 +151,28 @@ class Prompt(private val profileManager: ProfileManager) {
             }
         }
 
-    fun craftRecipe(recipes: List<RecipeStatus>) =
-        selectRecipe(recipes)?.let { recipeStatus ->
-            if (recipeStatus.canCraft) {
-                recipeStatus.recipe
-            } else {
-                null
+    fun craftRecipe(recipes: List<RecipeStatus>) = selectRecipe(recipes)
+
+    fun displayRecipeDiff(recipeStatus: RecipeStatus) =
+        StringBuilder().apply {
+            val indent = recipeStatus.recipe.ingredients.maxOf { it.name.length } + 1
+
+            appendLine()
+
+            recipeStatus.recipe.ingredients.filter { ingredient ->
+                recipeStatus.missingIngredients.none { (item, _) -> item.name == ingredient.name }
+            }.forEach { ingredient ->
+                appendLine(
+                    (brightGreen) ("+++ ${ingredient.name}${" ".repeat(indent - ingredient.name.length)}(${displayItemQuantity(ingredient.quantity)} ${ingredient.unit})")
+                )
             }
-        }
+            recipeStatus.missingIngredients.forEach { (item, quantityRemaining) ->
+                appendLine(
+                    (brightRed) ("--- ${item.name}${" ".repeat(indent - item.name.length)}(${displayItemQuantity(item.quantity - quantityRemaining)} / ${displayItemQuantity(item.quantity)}${if (item.unit.isNullOrBlank()) "" else " ${item.unit}"})")
+                )
+            }
+            appendLine()
+        }.toString().prependIndent(INDENT)
 
     private fun selectRecipe(recipes: List<RecipeStatus>) : RecipeStatus? {
         val colorMap = recipes.associateBy({ colorRecipeSelection(it) }, { it })
@@ -174,15 +192,15 @@ class Prompt(private val profileManager: ProfileManager) {
             brightRed
         }(recipe.recipe.itemName)
 
-    fun addRecipe() =
+    fun addRecipe(inventory: Inventory) =
         addRecipeName.let { recipeName ->
-            val ingredients = mutableListOf(addItem(ADD_INITIAL_INGREDIENT))
+            val ingredients = mutableListOf(addItem(inventory, ADD_INITIAL_INGREDIENT))
 
             do {
                 val action = promptAddIngredientOrFinish
 
                 if (action == Action.AddItem) {
-                    ingredients.add(addItem(ADD_INGREDIENT))
+                    ingredients.add(addItem(inventory, ADD_INGREDIENT))
                 }
             } while(action != Action.FinishRecipe)
 
@@ -208,7 +226,7 @@ class Prompt(private val profileManager: ProfileManager) {
             header {
                 row((bold + yellow)("Name"), (bold + yellow)("Quantity"))
             }
-            row(item.name, "${item.quantity} ${item.unit.orEmpty()}".trim())
+            displayItemRow(this, item)
         }.toString().prependIndent(INDENT)
 
     fun displayItems(items: List<Item>) =
@@ -223,7 +241,7 @@ class Prompt(private val profileManager: ProfileManager) {
             }
             body {
                 items.forEach {
-                    row(it.name, "${it.quantity} ${it.unit.orEmpty()}".trim())
+                    displayItemRow(this, it)
                 }
             }
             footer {
@@ -234,6 +252,16 @@ class Prompt(private val profileManager: ProfileManager) {
                 }
             }
         }.toString().prependIndent(INDENT)
+
+    private fun displayItemRow(dsl: TableSectionDsl, item: Item) =
+        dsl.row(item.name, "${displayItemQuantity(item.quantity)} ${item.unit.orEmpty()}".trim())
+
+    private fun displayItemQuantity(quantity: Double) =
+        if (quantity.mod(1.0) == 0.0) {
+            quantity.toInt().toString()
+        } else {
+            quantity.toString()
+        }
 
     private fun String.prependProfile() =
         "(${magenta(profileManager.currentProfile.name)}) $this"

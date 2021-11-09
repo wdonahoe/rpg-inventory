@@ -72,14 +72,17 @@ fun startInteractiveMode() {
 }
 
 fun craftItem() {
-    prompt.craftRecipe(inventory.recipes)?.let { recipe ->
-        inventory.craftRecipe(recipe)
+    prompt.craftRecipe(inventory.recipes)?.let { recipeStatus ->
+        if (recipeStatus.canCraft) {
+            inventory.craftRecipe(recipeStatus.recipe)
+        } else {
+            terminal.print(prompt.displayRecipeDiff(recipeStatus))
+        }
     }
 }
 
 fun addRecipe() {
-    prompt.addRecipe().let { recipe ->
-
+    prompt.addRecipe(inventory).let { recipe ->
         inventory.addRecipe(recipe)
 
         terminal.println(recipe.itemName)
@@ -98,7 +101,7 @@ fun listItems() {
 }
 
 fun addItem() {
-    prompt.addItem().let { item ->
+    prompt.addItem(inventory).let { item ->
         terminal.println(prompt.displayItem(item))
 
         inventory.addItem(item)

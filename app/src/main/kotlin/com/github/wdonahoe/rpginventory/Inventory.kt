@@ -53,6 +53,9 @@ class Inventory(
         recipeService.writeRecipes(_recipes.map { it.recipe })
     }
 
+    fun getUnit(itemName: String) =
+        items.firstOrNull { it.name == itemName }?.unit
+
     private fun getRecipeStatus(recipe: Recipe) =
         RecipeStatus(
             recipe,
