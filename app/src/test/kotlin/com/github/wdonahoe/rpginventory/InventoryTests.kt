@@ -4,6 +4,7 @@ import com.github.wdonahoe.rpginventory.model.Item
 import com.github.wdonahoe.rpginventory.model.Recipe
 import com.github.wdonahoe.rpginventory.service.InventoryFileService
 import com.github.wdonahoe.rpginventory.service.RecipeFileService
+import kotlinx.serialization.json.Json
 import org.junit.Assert
 import org.junit.Test
 
@@ -94,7 +95,41 @@ class InventoryTests {
             Assert.assertEquals(recipes.size, 1)
 
             Assert.assertEquals(recipes[0].recipe.ingredients[0].name, "ingredient 1")
+            Assert.assertEquals(recipes[0].recipe.ingredients[0].quantity, 1.0, 0.0)
+            Assert.assertEquals(recipes[0].recipe.ingredients[0].unit, "oz")
             Assert.assertEquals(recipes[0].recipe.ingredients[1].name, "ingredient 2")
+            Assert.assertEquals(recipes[0].recipe.ingredients[1].quantity, 2.0, 0.0)
+            Assert.assertNull(recipes[0].recipe.ingredients[1].unit)
+        }
+    }
+
+    @Test
+    fun testCraftRecipe() {
+        with(inventory) {
+            addItem(Item("a", 2.0, null))
+
+            addRecipe(
+                Recipe(
+                    "potion",
+                    listOf(
+                        Item("a", 2.0, null),
+                        Item("b", 4.0, null),
+                        Item("c", 2.0, "oz"),
+                    )
+                )
+            )
+
+            Assert.assertFalse(recipes[0].canCraft)
+
+            addItem(Item("b", 4.0, null))
+            addItem(Item("c", 2.0, "oz"))
+
+            Assert.assertTrue(recipes[0].canCraft)
+
+            craftRecipe(recipes[0].recipe)
+
+            Assert.assertEquals(items.size, 1)
+            Assert.assertEquals(items[0].name, "potion")
         }
     }
 }

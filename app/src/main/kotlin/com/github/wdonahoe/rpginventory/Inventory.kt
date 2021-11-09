@@ -108,4 +108,15 @@ class Inventory(
 
         inventoryService.writeItems(items)
     }
+
+    fun craftRecipe(recipe: Recipe) {
+        removeItems(recipe.ingredients)
+
+        addItem(
+            Item(
+                recipe.itemName,
+                1.0,
+                null)
+        )
+    }
 }

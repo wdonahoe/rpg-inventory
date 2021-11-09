@@ -73,14 +73,7 @@ fun startInteractiveMode() {
 
 fun craftItem() {
     prompt.craftRecipe(inventory.recipes)?.let { recipe ->
-        inventory.removeItems(recipe.ingredients)
-
-        inventory.addItem(
-            Item(
-                recipe.itemName,
-                1.0,
-                null)
-        )
+        inventory.craftRecipe(recipe)
     }
 }
 
