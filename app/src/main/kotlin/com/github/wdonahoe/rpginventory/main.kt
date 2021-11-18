@@ -5,6 +5,7 @@ import com.github.wdonahoe.rpginventory.commandline.*
 import com.github.wdonahoe.rpginventory.commandline.List
 import com.github.wdonahoe.rpginventory.model.Item
 import com.github.wdonahoe.rpginventory.model.Recipe
+import com.github.wdonahoe.rpginventory.service.ImportExportService
 import com.github.wdonahoe.rpginventory.service.InventoryFileService
 import com.github.wdonahoe.rpginventory.service.RecipeFileService
 import com.github.wdonahoe.rpginventory.service.TableOfContentsFileService
@@ -34,6 +35,12 @@ private val profileManager by lazy {
 private val prompt by lazy {
     Prompt(profileManager)
 }
+
+private val importExportService get() =
+    ImportExportService(
+        profileManager,
+        inventory
+    )
 
 @ExperimentalCli
 fun main(args: Array<String>) {
@@ -65,6 +72,7 @@ fun startInteractiveMode() {
                 Action.AddRecipe        -> addRecipe()
                 Action.RemoveItem       -> removeItems()
                 Action.ListItems        -> listItems()
+                Action.Advanced         -> displayAdvanced()
                 else -> { }
             }
         } while(action != Action.Exit)
@@ -154,6 +162,36 @@ fun createNewProfile() {
     } while (!profileManager.isInitialized())
 }
 
+fun displayAdvanced() {
+    do {
+        val action = prompt.advancedActions
+
+        val success = when (action) {
+            Action.ImportProfile -> importProfile()
+            Action.ExportProfile -> exportProfile()
+            else                 -> true
+        }
+    } while (action != Action.Back || !success)
+}
+
+fun exportProfile() =
+    importExportService
+        .export()
+        .let { success -> success }
+
+fun importProfile() =
+    importExportService
+        .import()
+        .let { (success, message, profile) ->
+            if (success) {
+                profileManager.setProfile(profile)
+            } else {
+                terminal.println(message)
+            }
+
+            success
+        }
+
 @ExperimentalCli
 fun handleArgs(args: Array<String>) {
     val parser = ArgParser("inventory", strictSubcommandOptionsOrder = true)
@@ -178,14 +216,6 @@ fun clearStatus(cleared: Boolean) {
         println("Inventory cleared!")
     } else {
         println("The inventory could not be cleared.")
-    }
-}
-
-fun exportStatus(path: String, exported: Boolean) {
-    if (exported) {
-        println("Inventory exported to $path.")
-    } else {
-        println("The inventory could not be exported.")
     }
 }
 

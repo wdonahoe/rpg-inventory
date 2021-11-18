@@ -19,12 +19,16 @@ import com.github.wdonahoe.rpginventory.view.Values.ADD_ITEM_QUANTITY
 import com.github.wdonahoe.rpginventory.view.Values.ADD_ITEM_UNITS
 import com.github.wdonahoe.rpginventory.view.Values.ADD_RECIPE
 import com.github.wdonahoe.rpginventory.view.Values.ADD_RECIPE_HEADER
+import com.github.wdonahoe.rpginventory.view.Values.ADVANCED
+import com.github.wdonahoe.rpginventory.view.Values.BACK
 import com.github.wdonahoe.rpginventory.view.Values.CANCEL
 import com.github.wdonahoe.rpginventory.view.Values.CRAFT_ITEM
 import com.github.wdonahoe.rpginventory.view.Values.CREATE_PROFILE_OPTION
 import com.github.wdonahoe.rpginventory.view.Values.CREATE_PROFILE_PROMPT
 import com.github.wdonahoe.rpginventory.view.Values.EXIT
+import com.github.wdonahoe.rpginventory.view.Values.EXPORT_PROFILE
 import com.github.wdonahoe.rpginventory.view.Values.FINISH_RECIPE
+import com.github.wdonahoe.rpginventory.view.Values.IMPORT_PROFILE
 import com.github.wdonahoe.rpginventory.view.Values.INDENT
 import com.github.wdonahoe.rpginventory.view.Values.LIST_ITEMS
 import com.github.wdonahoe.rpginventory.view.Values.REMOVE_ITEMS
@@ -76,19 +80,39 @@ class Prompt(private val profileManager: ProfileManager) {
                 REMOVE_ITEMS,
                 LIST_ITEMS,
                 SWITCH_PROFILE,
+                ADVANCED,
                 EXIT
             ).mapIndexed { index, action ->
                 " ${index + 1}) $action"
             }
         ).run {
             when(split(")")[1].trim()) {
-                ADD_ITEM -> Action.AddItem
-                ADD_RECIPE -> Action.AddRecipe
-                CRAFT_ITEM -> Action.CraftItem
-                REMOVE_ITEMS -> Action.RemoveItem
-                LIST_ITEMS -> Action.ListItems
-                SWITCH_PROFILE -> Action.SelectNewProfile
-                else -> Action.Exit
+                ADD_ITEM        -> Action.AddItem
+                ADD_RECIPE      -> Action.AddRecipe
+                CRAFT_ITEM      -> Action.CraftItem
+                REMOVE_ITEMS    -> Action.RemoveItem
+                LIST_ITEMS      -> Action.ListItems
+                SWITCH_PROFILE  -> Action.SelectNewProfile
+                ADVANCED        -> Action.Advanced
+                else            -> Action.Exit
+            }
+        }
+
+    val advancedActions get() =
+        KInquirer.promptList(
+            ACTIONS_HEADER.prependProfile(),
+            listOf(
+                IMPORT_PROFILE,
+                EXPORT_PROFILE,
+                BACK
+            ).mapIndexed { index, action ->
+                " ${index + 1}) $action"
+            }
+        ).run {
+            when(split(")")[1].trim()) {
+                IMPORT_PROFILE -> Action.ImportProfile
+                EXPORT_PROFILE -> Action.ExportProfile
+                else           -> Action.Back
             }
         }
 
@@ -99,18 +123,18 @@ class Prompt(private val profileManager: ProfileManager) {
             hint = ADD_ITEM_HINT
         ).trim()
 
-    private val addItemHasUnit get() =
+    private fun addItemHasUnit() =
         KInquirer.promptConfirm(
             ADD_ITEM_UNITS.prependProfile(),
             default = false
         )
 
-    private val addItemUnit get() =
+    private fun addItemUnit() =
         KInquirer.promptInput(
             ADD_ITEM_ENTER_UNITS.prependProfile(),
         )
 
-    private val addItemQuantity get() =
+    private fun addItemQuantity() =
         KInquirer.promptInputNumber(
             ADD_ITEM_QUANTITY.prependProfile()
         )
@@ -119,25 +143,25 @@ class Prompt(private val profileManager: ProfileManager) {
         addItemName(prompt).let { itemName ->
             val existingUnit = inventory.getUnit(itemName)
 
-            (if (existingUnit != null) true else addItemHasUnit).let { hasUnit ->
+            (if (existingUnit != null) true else addItemHasUnit()).let { hasUnit ->
                 if (hasUnit) {
-                    val unit = existingUnit ?: addItemUnit
+                    val unit = existingUnit ?: addItemUnit()
 
-                    Item(itemName, addItemQuantity.toDouble(), unit)
+                    Item(itemName, addItemQuantity().toDouble(), unit)
                 } else {
-                    Item(itemName, addItemQuantity.toDouble(), "")
+                    Item(itemName, addItemQuantity().toDouble(), "")
                 }
             }
         }
 
-    private val addRecipeName get() =
+    private fun addRecipeName() =
         KInquirer.promptInput(
             ADD_RECIPE_HEADER.prependProfile(),
             validation = String::isNotBlank,
             hint = ADD_ITEM_HINT
         ).trim()
 
-    private val promptAddIngredientOrFinish get() =
+    private fun promptAddIngredientOrFinish() =
         KInquirer.promptList(
             ACTIONS_HEADER.prependProfile(),
             listOf(
@@ -193,11 +217,11 @@ class Prompt(private val profileManager: ProfileManager) {
         }(recipe.recipe.itemName)
 
     fun addRecipe(inventory: Inventory) =
-        addRecipeName.let { recipeName ->
+        addRecipeName().let { recipeName ->
             val ingredients = mutableListOf(addItem(inventory, ADD_INITIAL_INGREDIENT))
 
             do {
-                val action = promptAddIngredientOrFinish
+                val action = promptAddIngredientOrFinish()
 
                 if (action == Action.AddItem) {
                     ingredients.add(addItem(inventory, ADD_INGREDIENT))
@@ -267,5 +291,5 @@ class Prompt(private val profileManager: ProfileManager) {
         "(${magenta(profileManager.currentProfile.name)}) $this"
 
     private fun String.removeProfile() =
-        this.removePrefix("(${profileManager.currentProfile.name}) ")
+        removePrefix("(${profileManager.currentProfile.name}) ")
 }

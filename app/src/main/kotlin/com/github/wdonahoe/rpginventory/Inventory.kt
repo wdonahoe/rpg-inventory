@@ -89,8 +89,6 @@ class Inventory(
         }
     }
 
-    fun export(path: String) {}
-
     fun removeAllItems(toRemove: List<String>) {
         _items.removeAll { toRemove.contains(it.name) }
 

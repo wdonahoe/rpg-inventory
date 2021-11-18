@@ -12,11 +12,14 @@ object Values {
     const val ACTIONS_HEADER = "Select an action:"
     const val ADD_ITEM = "Add an item"
     const val ADD_RECIPE = "Add a recipe"
+    const val CRAFT_ITEM = "Craft an item"
     const val REMOVE_ITEMS = "Remove items"
     const val LIST_ITEMS = "Display items"
     const val SWITCH_PROFILE = "Switch to a different profile"
+    const val ADVANCED = "Advanced actions"
     const val EXIT = "Exit"
     const val CANCEL = "Cancel"
+    const val BACK = "Back"
 
     const val ADD_ITEM_HEADER = "What is the name of the item?"
     const val ADD_ITEM_HINT = "type the name"
@@ -30,7 +33,8 @@ object Values {
     const val ADD_ADDITIONAL_INGREDIENT = "Add an additional ingredient"
     const val FINISH_RECIPE = "Finish the recipe"
 
-    const val CRAFT_ITEM = "Craft an item."
+    const val IMPORT_PROFILE = "Import a profile"
+    const val EXPORT_PROFILE = "Export a profile"
 
     const val TABLE_PADDING = 2
     const val INDENT = "  "

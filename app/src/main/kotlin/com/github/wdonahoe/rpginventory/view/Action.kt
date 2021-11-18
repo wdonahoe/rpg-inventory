@@ -7,6 +7,10 @@ enum class Action {
     RemoveItem,
     ListItems,
     SelectNewProfile,
+    Advanced,
     FinishRecipe,
+    ImportProfile,
+    ExportProfile,
+    Back,
     Exit
 }
