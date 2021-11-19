@@ -7,7 +7,7 @@ import org.apache.commons.csv.CSVPrinter
 import java.io.BufferedReader
 import java.io.BufferedWriter
 
-class InventoryFileService(private val inventory: File) {
+class InventoryFileService(val inventory: File) {
 
     private val csvPrinter
         get() =

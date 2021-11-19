@@ -7,7 +7,7 @@ import kotlinx.serialization.json.Json
 import java.io.BufferedReader
 import java.io.BufferedWriter
 
-class RecipeFileService(private val recipeFile: File) {
+class RecipeFileService(val recipeFile: File) {
     fun readAll() : List<Recipe> =
         BufferedReader(recipeFile.reader).use { reader ->
             reader.readText().let { json ->

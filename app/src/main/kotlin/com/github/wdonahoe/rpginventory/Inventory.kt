@@ -8,8 +8,8 @@ import com.github.wdonahoe.rpginventory.service.InventoryFileService
 import com.github.wdonahoe.rpginventory.service.RecipeFileService
 
 class Inventory(
-    private val inventoryService: InventoryFileService,
-    private val recipeService: RecipeFileService
+    val inventoryService: InventoryFileService,
+    val recipeService: RecipeFileService
 ) {
 
     private var _items =

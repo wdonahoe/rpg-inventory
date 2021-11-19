@@ -36,6 +36,8 @@ object Values {
     const val IMPORT_PROFILE = "Import a profile"
     const val EXPORT_PROFILE = "Export a profile"
 
+    const val EXPORT_PATH = "Enter the path of the directory you would like to export your profile to"
+
     const val TABLE_PADDING = 2
     const val INDENT = "  "
 }

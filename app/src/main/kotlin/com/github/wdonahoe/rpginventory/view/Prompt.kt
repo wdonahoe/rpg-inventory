@@ -26,6 +26,7 @@ import com.github.wdonahoe.rpginventory.view.Values.CRAFT_ITEM
 import com.github.wdonahoe.rpginventory.view.Values.CREATE_PROFILE_OPTION
 import com.github.wdonahoe.rpginventory.view.Values.CREATE_PROFILE_PROMPT
 import com.github.wdonahoe.rpginventory.view.Values.EXIT
+import com.github.wdonahoe.rpginventory.view.Values.EXPORT_PATH
 import com.github.wdonahoe.rpginventory.view.Values.EXPORT_PROFILE
 import com.github.wdonahoe.rpginventory.view.Values.FINISH_RECIPE
 import com.github.wdonahoe.rpginventory.view.Values.IMPORT_PROFILE
@@ -40,6 +41,7 @@ import com.jakewharton.picnic.TableSectionDsl
 import com.jakewharton.picnic.table
 import com.yg.kotlin.inquirer.components.*
 import com.yg.kotlin.inquirer.core.KInquirer
+import java.io.File
 
 class Prompt(private val profileManager: ProfileManager) {
 
@@ -176,6 +178,16 @@ class Prompt(private val profileManager: ProfileManager) {
         }
 
     fun craftRecipe(recipes: List<RecipeStatus>) = selectRecipe(recipes)
+
+    fun exportProfile() =
+        KInquirer.promptInput(
+            EXPORT_PATH,
+            hint = "Press enter to cancel"
+        ).run {
+            ifEmpty { null }
+        }
+
+    fun importProfile() = ""
 
     fun displayRecipeDiff(recipeStatus: RecipeStatus) =
         StringBuilder().apply {

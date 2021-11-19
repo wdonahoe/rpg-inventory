@@ -39,7 +39,8 @@ private val prompt by lazy {
 private val importExportService get() =
     ImportExportService(
         profileManager,
-        inventory
+        inventory.inventoryService,
+        inventory.recipeService
     )
 
 @ExperimentalCli
@@ -175,21 +176,41 @@ fun displayAdvanced() {
 }
 
 fun exportProfile() =
-    importExportService
-        .export()
-        .let { success -> success }
+    prompt
+        .exportProfile()
+        .let { path ->
+            if (path != null) {
+                importExportService
+                    .export(path)
+                    .let { (success, message) ->
+                        terminal.println(message)
+
+                        success
+                    }
+            } else {
+                false
+            }
+        }
 
 fun importProfile() =
-    importExportService
-        .import()
-        .let { (success, message, profile) ->
-            if (success) {
-                profileManager.setProfile(profile)
-            } else {
-                terminal.println(message)
-            }
+    prompt
+        .exportProfile()
+        .let { path ->
+            if (path != null) {
+                importExportService
+                    .import(path)
+                    .let { (success, message, profile) ->
+                        terminal.println(message)
 
-            success
+                        if (success) {
+                            profileManager.setProfile(profile)
+                        }
+
+                        success
+                    }
+            } else {
+                false
+            }
         }
 
 @ExperimentalCli
