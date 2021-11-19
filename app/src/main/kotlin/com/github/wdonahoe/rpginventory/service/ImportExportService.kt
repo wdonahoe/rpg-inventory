@@ -13,7 +13,7 @@ class ImportExportService(
 ) {
     private val files get() =
         listOf(
-            inventoryFileService.inventory,
+            inventoryFileService.inventoryFile,
             recipeFileService.recipeFile
         ).map {
             (it as? DiskFile)?.path
@@ -23,12 +23,12 @@ class ImportExportService(
         try {
             path.run {
                 val zipFile = File(path, profileManager.currentProfile.name + ".zip")
+
                 ZipOutputStream(BufferedOutputStream(FileOutputStream(zipFile))).use { out ->
-                    for (file in files.filterNotNull()) {
+                    for (file in files.filterNotNull().map { File(it) }) {
                         FileInputStream(file).use { f ->
                             BufferedInputStream(f).use { origin ->
-                                val entry = ZipEntry(file.substring(file.lastIndexOf("/")))
-                                out.putNextEntry(entry)
+                                out.putNextEntry(ZipEntry(file.name))
 
                                 origin.copyTo(out, 1024)
                             }

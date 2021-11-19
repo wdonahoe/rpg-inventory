@@ -7,17 +7,17 @@ import org.apache.commons.csv.CSVPrinter
 import java.io.BufferedReader
 import java.io.BufferedWriter
 
-class InventoryFileService(val inventory: File) {
+class InventoryFileService(val inventoryFile: File) {
 
     private val csvPrinter
         get() =
             CSVPrinter(
-                BufferedWriter(inventory.getWriter(append = false)),
+                BufferedWriter(inventoryFile.getWriter(append = false)),
                 CSVFormat.DEFAULT
             )
 
     fun readAll() =
-        BufferedReader(inventory.reader).use { reader ->
+        BufferedReader(inventoryFile.reader).use { reader ->
             CSVParser(
                 reader,
                 CSVFormat.DEFAULT
@@ -33,7 +33,7 @@ class InventoryFileService(val inventory: File) {
         }
 
     fun clearInventory() {
-        //Files.newBufferedWriter(inventory.reader, StandardOpenOption.TRUNCATE_EXISTING).use {  }
+        //Files.newBufferedWriter(inventoryFile.reader, StandardOpenOption.TRUNCATE_EXISTING).use {  }
     }
 
     fun writeItems(items: List<Item>) {

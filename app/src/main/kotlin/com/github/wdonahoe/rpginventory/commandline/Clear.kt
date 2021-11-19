@@ -4,6 +4,6 @@ import kotlinx.cli.ExperimentalCli
 import kotlinx.cli.Subcommand
 
 @ExperimentalCli
-class Clear : Subcommand("clear", "Clear the inventory") {
+class Clear : Subcommand("clear", "Clear the inventoryFile") {
     override fun execute() { }
 }

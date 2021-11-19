@@ -215,7 +215,7 @@ fun importProfile() =
 
 @ExperimentalCli
 fun handleArgs(args: Array<String>) {
-    val parser = ArgParser("inventory", strictSubcommandOptionsOrder = true)
+    val parser = ArgParser("inventoryFile", strictSubcommandOptionsOrder = true)
 
     val add = Add()
     val list = List()
@@ -228,7 +228,7 @@ fun handleArgs(args: Array<String>) {
         add.name -> add.result?.withUnit()?.also(inventory::addItem) ?: warn()
         list.name -> printInventory()
         clear.name -> inventory.clear().also(::clearStatus)
-        //export.name -> inventory.export(export.path).also { exportStatus(export.path, it) }
+        //export.name -> inventoryFile.export(export.path).also { exportStatus(export.path, it) }
     }
 }
 
@@ -236,14 +236,14 @@ fun clearStatus(cleared: Boolean) {
     if (cleared) {
         println("Inventory cleared!")
     } else {
-        println("The inventory could not be cleared.")
+        println("The inventoryFile could not be cleared.")
     }
 }
 
 fun printInventory() {
     inventory.apply {
         if (items.none()) {
-            println("There are no items in the inventory")
+            println("There are no items in the inventoryFile")
         }
         else {
             val leftAlignFormat = "| %-32s | %-8s |%n"

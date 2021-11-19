@@ -4,6 +4,6 @@ import kotlinx.cli.ExperimentalCli
 import kotlinx.cli.Subcommand
 
 @ExperimentalCli
-class List  : Subcommand("list", "List the items in the inventory.") {
+class List  : Subcommand("list", "List the items in the inventoryFile.") {
     override fun execute() { }
 }
