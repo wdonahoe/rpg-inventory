@@ -131,4 +131,19 @@ class InventoryTests {
             Assert.assertEquals(items[0].name, "potion")
         }
     }
+    
+    @Test
+    fun testClear() {
+        with(inventory) {
+            addItem(Item("a", 2.0, null))
+            addItem(Item("b", 1.0, "oz"))
+            addItem(Item("c", 2.0, null))
+
+            Assert.assertEquals(items.size, 3)
+
+            clear()
+
+            Assert.assertEquals(items.size, 0)
+        }
+    }
 }
