@@ -11,6 +11,10 @@ enum class Action {
     FinishRecipe,
     ImportProfile,
     ExportProfile,
+    ImportItems,
+    ImportRecipes,
+    ClearItems,
+    ClearRecipes,
     Back,
     Exit
 }

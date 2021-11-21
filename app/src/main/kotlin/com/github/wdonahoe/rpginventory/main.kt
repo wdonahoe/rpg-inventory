@@ -13,6 +13,7 @@ import com.github.wdonahoe.rpginventory.util.FileUtil
 import com.github.wdonahoe.rpginventory.view.Action
 import com.github.wdonahoe.rpginventory.view.ProfileSelection
 import com.github.wdonahoe.rpginventory.view.Prompt
+import com.github.wdonahoe.rpginventory.view.Values.INDENT
 import com.yg.kotlin.inquirer.components.promptInput
 import com.yg.kotlin.inquirer.core.KInquirer
 import kotlinx.cli.ArgParser
@@ -170,52 +171,59 @@ fun displayAdvanced() {
         val success = when (action) {
             Action.ImportProfile -> importProfile()
             Action.ExportProfile -> exportProfile()
+            Action.ClearItems    -> clearItems()
             else                 -> true
         }
     } while (action != Action.Back || !success)
 }
 
-fun exportProfile() =
-    prompt
-        .exportProfile()
-        .let { path ->
-            if (path != null) {
-                importExportService
-                    .export(path)
-                    .let { (success, message) ->
-                        terminal.println(message)
+fun clearItems() =
+    inventory.clear().let { (success, message) ->
+        terminal.println(if (success) {
+            "inventory cleared!"
+        } else {
+            message
+        }?.prependIndent(INDENT))
 
-                        success
-                    }
-            } else {
-                false
-            }
-        }
+        success
+    }
 
-fun importProfile() =
-    prompt
-        .exportProfile()
-        .let { path ->
-            if (path != null) {
-                importExportService
-                    .import(path)
-                    .let { (success, message, profile) ->
-                        terminal.println(message)
+fun exportProfile() : Boolean {
+    val exportPath = prompt.exportProfile()
 
-                        if (success) {
-                            profileManager.setProfile(profile)
-                        }
+    return if (exportPath != null) {
+        val (success, message) = importExportService.export(exportPath)
 
-                        success
-                    }
-            } else {
-                false
-            }
-        }
+        terminal.println(message)
+
+        success
+    } else {
+        false
+    }
+}
+
+fun importProfile() : Boolean {
+    return true
+//    val importPath = prompt.importProfile()
+//
+//    return if (importPath != null) {
+//        val (success, message, profile) = importExportService.import(importPath)
+//
+//        terminal.println(message)
+//
+//        if (success) {
+//            profileManager.setProfile(profile)
+//        }
+//
+//        success
+//    } else {
+//        false
+//    }
+}
 
 @ExperimentalCli
 fun handleArgs(args: Array<String>) {
-    val parser = ArgParser("inventoryFile", strictSubcommandOptionsOrder = true)
+    val parser = ArgParser("inventory", strictSubcommandOptionsOrder = true)
 
     val add = Add()
     val list = List()
@@ -227,7 +235,7 @@ fun handleArgs(args: Array<String>) {
     when (parser.parse(args).commandName) {
         add.name -> add.result?.withUnit()?.also(inventory::addItem) ?: warn()
         list.name -> printInventory()
-        clear.name -> inventory.clear().also(::clearStatus)
+        //clear.name -> inventory.clear().also(::clearStatus)
         //export.name -> inventoryFile.export(export.path).also { exportStatus(export.path, it) }
     }
 }

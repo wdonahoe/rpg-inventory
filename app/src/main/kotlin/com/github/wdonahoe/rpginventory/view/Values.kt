@@ -33,8 +33,12 @@ object Values {
     const val ADD_ADDITIONAL_INGREDIENT = "Add an additional ingredient"
     const val FINISH_RECIPE = "Finish the recipe"
 
-    const val IMPORT_PROFILE = "Import a profile"
-    const val EXPORT_PROFILE = "Export a profile"
+    const val IMPORT_PROFILE = "Import a profile (a zip archive containing recipes.json and inventory.csv)"
+    const val EXPORT_PROFILE = "Export your profile to a zip archive"
+    const val IMPORT_ITEMS = "Bulk import items from a csv file"
+    const val IMPORT_RECIPES = "Bulk import recipes from a json file"
+    const val CLEAR_INVENTORY = "Clear all items from your inventory"
+    const val CLEAR_RECIPES = "Clear all recipes from your inventory"
 
     const val EXPORT_PATH = "Enter the path of the directory you would like to export your profile to"
 

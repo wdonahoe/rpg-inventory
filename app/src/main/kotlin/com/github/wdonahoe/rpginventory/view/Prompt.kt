@@ -22,6 +22,8 @@ import com.github.wdonahoe.rpginventory.view.Values.ADD_RECIPE_HEADER
 import com.github.wdonahoe.rpginventory.view.Values.ADVANCED
 import com.github.wdonahoe.rpginventory.view.Values.BACK
 import com.github.wdonahoe.rpginventory.view.Values.CANCEL
+import com.github.wdonahoe.rpginventory.view.Values.CLEAR_INVENTORY
+import com.github.wdonahoe.rpginventory.view.Values.CLEAR_RECIPES
 import com.github.wdonahoe.rpginventory.view.Values.CRAFT_ITEM
 import com.github.wdonahoe.rpginventory.view.Values.CREATE_PROFILE_OPTION
 import com.github.wdonahoe.rpginventory.view.Values.CREATE_PROFILE_PROMPT
@@ -29,7 +31,9 @@ import com.github.wdonahoe.rpginventory.view.Values.EXIT
 import com.github.wdonahoe.rpginventory.view.Values.EXPORT_PATH
 import com.github.wdonahoe.rpginventory.view.Values.EXPORT_PROFILE
 import com.github.wdonahoe.rpginventory.view.Values.FINISH_RECIPE
+import com.github.wdonahoe.rpginventory.view.Values.IMPORT_ITEMS
 import com.github.wdonahoe.rpginventory.view.Values.IMPORT_PROFILE
+import com.github.wdonahoe.rpginventory.view.Values.IMPORT_RECIPES
 import com.github.wdonahoe.rpginventory.view.Values.INDENT
 import com.github.wdonahoe.rpginventory.view.Values.LIST_ITEMS
 import com.github.wdonahoe.rpginventory.view.Values.REMOVE_ITEMS
@@ -41,7 +45,6 @@ import com.jakewharton.picnic.TableSectionDsl
 import com.jakewharton.picnic.table
 import com.yg.kotlin.inquirer.components.*
 import com.yg.kotlin.inquirer.core.KInquirer
-import java.io.File
 
 class Prompt(private val profileManager: ProfileManager) {
 
@@ -72,51 +75,50 @@ class Prompt(private val profileManager: ProfileManager) {
             }
         }
 
-    val primaryActions get() =
+    private fun promptActions(message: String, map: List<Pair<String, Action>>) =
         KInquirer.promptList(
-            ACTIONS_HEADER.prependProfile(),
-            listOf(
-                ADD_ITEM,
-                ADD_RECIPE,
-                CRAFT_ITEM,
-                REMOVE_ITEMS,
-                LIST_ITEMS,
-                SWITCH_PROFILE,
-                ADVANCED,
-                EXIT
-            ).mapIndexed { index, action ->
-                " ${index + 1}) $action"
+            message,
+            map.mapIndexed { index, (msg, _) ->
+                " ${index + 1}) $msg"
             }
         ).run {
-            when(split(")")[1].trim()) {
-                ADD_ITEM        -> Action.AddItem
-                ADD_RECIPE      -> Action.AddRecipe
-                CRAFT_ITEM      -> Action.CraftItem
-                REMOVE_ITEMS    -> Action.RemoveItem
-                LIST_ITEMS      -> Action.ListItems
-                SWITCH_PROFILE  -> Action.SelectNewProfile
-                ADVANCED        -> Action.Advanced
-                else            -> Action.Exit
-            }
+            split(")")
+                .first()
+                .trim()
+                .toInt()
+                .let { index ->
+                    map[index - 1].second
+                }
         }
 
-    val advancedActions get() =
-        KInquirer.promptList(
+    val primaryActions get() =
+        promptActions(
             ACTIONS_HEADER.prependProfile(),
             listOf(
-                IMPORT_PROFILE,
-                EXPORT_PROFILE,
-                BACK
-            ).mapIndexed { index, action ->
-                " ${index + 1}) $action"
-            }
-        ).run {
-            when(split(")")[1].trim()) {
-                IMPORT_PROFILE -> Action.ImportProfile
-                EXPORT_PROFILE -> Action.ExportProfile
-                else           -> Action.Back
-            }
-        }
+                ADD_ITEM        to Action.AddItem,
+                ADD_RECIPE      to Action.AddRecipe,
+                CRAFT_ITEM      to Action.CraftItem,
+                REMOVE_ITEMS    to Action.RemoveItem,
+                LIST_ITEMS      to Action.ListItems,
+                SWITCH_PROFILE  to Action.SelectNewProfile,
+                ADVANCED        to Action.Advanced,
+                EXIT            to Action.Exit
+            )
+        )
+
+    val advancedActions get() =
+        promptActions(
+            ACTIONS_HEADER.prependProfile(),
+            listOf(
+                IMPORT_ITEMS    to Action.ImportItems,
+                IMPORT_RECIPES  to Action.ImportRecipes,
+                IMPORT_PROFILE  to Action.ImportProfile,
+                CLEAR_INVENTORY to Action.ClearItems,
+                CLEAR_RECIPES   to Action.ClearRecipes,
+                EXPORT_PROFILE  to Action.ExportProfile,
+                BACK            to Action.Back
+            )
+        )
 
     private fun addItemName(prompt: String) =
         KInquirer.promptInput(
@@ -266,28 +268,32 @@ class Prompt(private val profileManager: ProfileManager) {
         }.toString().prependIndent(INDENT)
 
     fun displayItems(items: List<Item>) =
-        table {
-            cellStyle {
-                border = true
-                paddingLeft = TABLE_PADDING
-                paddingRight = TABLE_PADDING
-            }
-            header {
-                row((bold + yellow)("Name"), (bold + yellow)("Quantity"))
-            }
-            body {
-                items.forEach {
-                    displayItemRow(this, it)
+        if (items.none()) {
+            "There are no items to display"
+        } else {
+            table {
+                cellStyle {
+                    border = true
+                    paddingLeft = TABLE_PADDING
+                    paddingRight = TABLE_PADDING
                 }
-            }
-            footer {
-                row {
-                    cell(bold("Total Items: ${items.size}")) {
-                        columnSpan = 2
+                header {
+                    row((bold + yellow)("Name"), (bold + yellow)("Quantity"))
+                }
+                body {
+                    items.forEach {
+                        displayItemRow(this, it)
                     }
                 }
-            }
-        }.toString().prependIndent(INDENT)
+                footer {
+                    row {
+                        cell(bold("Total Items: ${items.size}")) {
+                            columnSpan = 2
+                        }
+                    }
+                }
+            }.toString()
+        }.prependIndent(INDENT)
 
     private fun displayItemRow(dsl: TableSectionDsl, item: Item) =
         dsl.row(item.name, "${displayItemQuantity(item.quantity)} ${item.unit.orEmpty()}".trim())

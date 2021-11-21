@@ -78,14 +78,15 @@ class Inventory(
             }
         }
 
-    fun clear(): Boolean {
+    fun clear(): Pair<Boolean, String?> {
         _items.clear()
 
         return try {
             inventoryService.clearInventory()
-            true
+
+            true to null
         } catch (ex: Exception) {
-            false
+            false to ex.message
         }
     }
 

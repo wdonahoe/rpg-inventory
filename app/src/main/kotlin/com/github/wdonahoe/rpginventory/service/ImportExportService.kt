@@ -39,7 +39,7 @@ class ImportExportService(
                 true to "Exported profile to ${zipFile.absolutePath}!"
             }
         } catch (ex: Exception) {
-            false to ex.message
+            false to "Export failed: ${ex.message}"
         }
 
     fun import(path: String) =
