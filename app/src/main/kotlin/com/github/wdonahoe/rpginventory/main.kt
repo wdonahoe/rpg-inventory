@@ -3,8 +3,6 @@ package com.github.wdonahoe.rpginventory
 import com.github.ajalt.mordant.terminal.Terminal
 import com.github.wdonahoe.rpginventory.commandline.*
 import com.github.wdonahoe.rpginventory.commandline.List
-import com.github.wdonahoe.rpginventory.model.Item
-import com.github.wdonahoe.rpginventory.model.Recipe
 import com.github.wdonahoe.rpginventory.service.ImportExportService
 import com.github.wdonahoe.rpginventory.service.InventoryFileService
 import com.github.wdonahoe.rpginventory.service.RecipeFileService
@@ -172,15 +170,27 @@ fun displayAdvanced() {
             Action.ImportProfile -> importProfile()
             Action.ExportProfile -> exportProfile()
             Action.ClearItems    -> clearItems()
+            Action.ClearRecipes  -> clearRecipes()
             else                 -> true
         }
     } while (action != Action.Back || !success)
 }
 
 fun clearItems() =
-    inventory.clear().let { (success, message) ->
+    inventory.clearItems().let { (success, message) ->
         terminal.println(if (success) {
             "inventory cleared!"
+        } else {
+            message
+        }?.prependIndent(INDENT))
+
+        success
+    }
+
+fun clearRecipes() =
+    inventory.clearRecipes().let { (success, message) ->
+        terminal.println(if (success) {
+            "recipes cleared!"
         } else {
             message
         }?.prependIndent(INDENT))
@@ -235,7 +245,7 @@ fun handleArgs(args: Array<String>) {
     when (parser.parse(args).commandName) {
         add.name -> add.result?.withUnit()?.also(inventory::addItem) ?: warn()
         list.name -> printInventory()
-        //clear.name -> inventory.clear().also(::clearStatus)
+        //clearItems.name -> inventory.clearItems().also(::clearStatus)
         //export.name -> inventoryFile.export(export.path).also { exportStatus(export.path, it) }
     }
 }

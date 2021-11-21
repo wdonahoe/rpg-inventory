@@ -6,6 +6,9 @@ import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVPrinter
 import java.io.BufferedReader
 import java.io.BufferedWriter
+import java.nio.file.Files
+import java.nio.file.StandardOpenOption
+import java.io.File as JavaFile
 
 class InventoryFileService(val inventoryFile: File) {
 
@@ -33,7 +36,9 @@ class InventoryFileService(val inventoryFile: File) {
         }
 
     fun clearInventory() {
-        //Files.newBufferedWriter(inventoryFile.reader, StandardOpenOption.TRUNCATE_EXISTING).use {  }
+        (inventoryFile as? DiskFile)?.let { diskFile ->
+            Files.newBufferedWriter(JavaFile(diskFile.path).toPath(), StandardOpenOption.TRUNCATE_EXISTING).use {  }
+        }
     }
 
     fun writeItems(items: List<Item>) {

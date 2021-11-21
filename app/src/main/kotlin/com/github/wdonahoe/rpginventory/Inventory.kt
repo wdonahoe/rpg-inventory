@@ -78,7 +78,19 @@ class Inventory(
             }
         }
 
-    fun clear(): Pair<Boolean, String?> {
+    fun clearRecipes() : Pair<Boolean, String?> {
+        _recipes.clear()
+
+        return try {
+            recipeService.clearRecipes()
+
+            true to null
+        } catch (ex: Exception) {
+            false to ex.message
+        }
+    }
+
+    fun clearItems(): Pair<Boolean, String?> {
         _items.clear()
 
         return try {

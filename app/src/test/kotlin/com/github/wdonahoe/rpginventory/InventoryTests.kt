@@ -131,7 +131,7 @@ class InventoryTests {
             Assert.assertEquals(items[0].name, "potion")
         }
     }
-    
+
     @Test
     fun testClear() {
         with(inventory) {
@@ -141,7 +141,7 @@ class InventoryTests {
 
             Assert.assertEquals(items.size, 3)
 
-            clear()
+            clearItems()
 
             Assert.assertEquals(items.size, 0)
         }
