@@ -314,5 +314,16 @@ class Prompt(private val profileManager: ProfileManager) {
     fun importItems() =
         KInquirer.promptInput(
             "Type the path of a CSV file containing the items.",
-        )
+            hint = "Press enter to see a sample"
+        ).run {
+            ifEmpty { null }
+        }
+
+    fun importRecipes() =
+        KInquirer.promptInput(
+            "Type the path of a JSON file containing the recipes.",
+            hint = "Press enter to see a sample"
+        ).run {
+            ifEmpty { null }
+        }
 }

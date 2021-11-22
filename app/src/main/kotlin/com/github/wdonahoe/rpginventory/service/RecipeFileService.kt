@@ -6,12 +6,13 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.io.BufferedReader
 import java.io.BufferedWriter
+import java.io.Reader
 import java.nio.file.Files
 import java.nio.file.StandardOpenOption
 
 class RecipeFileService(val recipeFile: File) {
-    fun readAll() : List<Recipe> =
-        BufferedReader(recipeFile.reader).use { reader ->
+    fun readAll(fileReader: Reader? = null) : List<Recipe> =
+        BufferedReader(fileReader ?: recipeFile.reader).use { reader ->
             reader.readText().let { json ->
                 if (json.isEmpty()) {
                     listOf()

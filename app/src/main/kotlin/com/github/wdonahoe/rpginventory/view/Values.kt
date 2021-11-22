@@ -44,4 +44,49 @@ object Values {
 
     const val TABLE_PADDING = 2
     const val INDENT = "  "
+
+    val INVENTORY_SAMPLE =
+    """
+        Ethereal Water,2.0,quarts
+        Mudos Mushrooms,2.0,
+        Garenza Leaf,3.0,
+        Blood of a freshly-slain mammal,2.0,pints
+        Charcoal,2.0,bricks
+    """.trimIndent()
+
+    val RECIPES_SAMPLE =
+        """
+[
+    {
+        "itemName": "Potion of Healing",
+        "ingredients": [
+            {
+                "name": "Ethereal Water",
+                "quantity": 2.0,
+                "unit": "quarts"
+            },
+            {
+                "name": "Mudos Mushroom",
+                "quantity": 2.0,
+                "unit": ""
+            },
+            {
+                "name": "Garenza Leaf",
+                "quantity": 3.0,
+                "unit": ""
+            },
+            {
+                "name": "Blood of a freshly-slain mammal",
+                "quantity": 2.0,
+                "unit": "pints"
+            },
+            {
+                "name": "Charcoal",
+                "quantity": 2.0,
+                "unit": "bricks"
+            }
+        ]
+    }
+]
+""".trimIndent()
 }

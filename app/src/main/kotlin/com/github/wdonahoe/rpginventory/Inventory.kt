@@ -57,14 +57,16 @@ class Inventory(
         }
     }
 
-    fun addRecipe(recipe: Recipe) {
+    fun addRecipe(recipe: Recipe, write: Boolean = true) {
         _recipes.add(getRecipeStatus(recipe))
 
-        recipeService.writeRecipes(_recipes.map { it.recipe })
+        if (write) {
+            recipeService.writeRecipes(_recipes.map { it.recipe })
+        }
     }
 
     fun getUnit(itemName: String) =
-        items.firstOrNull { it.name == itemName }?.unit ?: recipes.firstOrNull { it.recipe.ingredients.any { ingredient -> ingredient.name == itemName} }?.recipe?.ingredients?.first { it.name == itemName }?.unit
+        items.firstOrNull { it.name.equals(itemName, ignoreCase = true) }?.unit ?: recipes.firstOrNull { it.recipe.ingredients.any { ingredient -> ingredient.name.equals(itemName, ignoreCase = true)} }?.recipe?.ingredients?.first { it.name.equals(itemName, ignoreCase = true) }?.unit
 
     private fun getRecipeStatus(recipe: Recipe) =
         RecipeStatus(
@@ -80,7 +82,7 @@ class Inventory(
         )
 
     private fun getIngredientQuantityRemaining(ingredient: Item) =
-        items.firstOrNull { it.name == ingredient.name }.let { item ->
+        items.firstOrNull { it.name.equals(ingredient.name, ignoreCase = true) }.let { item ->
             if (item == null) {
                 ingredient.quantity
             } else {
@@ -118,9 +120,9 @@ class Inventory(
         inventoryService.writeItems(items)
     }
 
-    fun removeItems(toRemove: List<Item>) {
+    private fun removeItems(toRemove: List<Item>) {
         for (item in toRemove) {
-            val toUpdate = items.first { it.name == item.name }
+            val toUpdate = items.first { it.name.equals(item.name, ignoreCase = true) }
             toUpdate.quantity -= item.quantity
 
             if (toUpdate.quantity <= 0.0) {
@@ -140,7 +142,16 @@ class Inventory(
             Item(
                 recipe.itemName,
                 1.0,
-                null)
+                null
+            )
         )
+    }
+
+    fun addRecipes(recipes: List<Recipe>) {
+        for (recipe in recipes) {
+            addRecipe(recipe, write = false)
+        }
+
+        recipeService.writeRecipes(_recipes.map { it.recipe })
     }
 }

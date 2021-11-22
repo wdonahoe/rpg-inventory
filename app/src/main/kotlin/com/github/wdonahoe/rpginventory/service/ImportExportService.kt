@@ -46,13 +46,21 @@ class ImportExportService(
     fun import(path: String) =
         Triple(false, "failure", "")
 
-    fun importItems(path: String): Pair<Boolean, List<Item>> {
-        return try {
+    fun importItems(path: String) =
+        try {
             inventoryFileService.readAll(DiskFile(File(path)).reader).let { items ->
                 true to items
             }
         } catch (ex: Exception) {
             false to listOf()
         }
-    }
+
+    fun importRecipes(path: String) =
+        try {
+            recipeFileService.readAll(DiskFile(File(path)).reader).let { recipes ->
+                true to recipes
+            }
+        } catch (ex: Exception) {
+            false to listOf()
+        }
 }

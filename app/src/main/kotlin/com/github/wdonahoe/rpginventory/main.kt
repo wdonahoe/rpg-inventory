@@ -1,5 +1,7 @@
 package com.github.wdonahoe.rpginventory
 
+import com.github.ajalt.mordant.rendering.TextColors
+import com.github.ajalt.mordant.rendering.TextStyles
 import com.github.ajalt.mordant.terminal.Terminal
 import com.github.wdonahoe.rpginventory.commandline.*
 import com.github.wdonahoe.rpginventory.commandline.List
@@ -12,6 +14,8 @@ import com.github.wdonahoe.rpginventory.view.Action
 import com.github.wdonahoe.rpginventory.view.ProfileSelection
 import com.github.wdonahoe.rpginventory.view.Prompt
 import com.github.wdonahoe.rpginventory.view.Values.INDENT
+import com.github.wdonahoe.rpginventory.view.Values.INVENTORY_SAMPLE
+import com.github.wdonahoe.rpginventory.view.Values.RECIPES_SAMPLE
 import com.yg.kotlin.inquirer.components.promptInput
 import com.yg.kotlin.inquirer.core.KInquirer
 import kotlinx.cli.ArgParser
@@ -169,6 +173,7 @@ fun displayAdvanced() {
         val success = when (action) {
             Action.ImportProfile -> importProfile()
             Action.ImportItems   -> importItems()
+            Action.ImportRecipes -> importRecipes()
             Action.ClearItems    -> clearItems()
             Action.ClearRecipes  -> clearRecipes()
             Action.ExportProfile -> exportProfile()
@@ -177,20 +182,58 @@ fun displayAdvanced() {
     } while (action != Action.Back || !success)
 }
 
-fun importItems() =
-    prompt.importItems().let { path ->
-        importExportService.importItems(path).let { (success, items) ->
-            if (success) {
-                inventory.addItems(items)
+fun importRecipes() =
+    prompt.importRecipes().let { path ->
+        if (path != null) {
+            importExportService.importRecipes(path).let { (success, recipes) ->
+                if (success) {
+                    inventory.addRecipes(recipes)
 
-                terminal.println("items imported!".prependIndent(INDENT))
-            } else {
-                terminal.print("failed to import items".prependIndent(INDENT))
+                    terminal.println("recipes imported!".prependIndent(INDENT))
+                } else {
+                    terminal.print("failed to import recipes".prependIndent(INDENT))
+                }
+
+                success
             }
 
-            success
+            true
+        } else {
+            displaySampleFile(RECIPES_SAMPLE)
+
+            false
         }
     }
+
+fun importItems() =
+    prompt.importItems().let { path ->
+        if (path != null) {
+            importExportService.importItems(path).let { (success, items) ->
+                if (success) {
+                    inventory.addItems(items)
+
+                    terminal.println("items imported!".prependIndent(INDENT))
+                } else {
+                    terminal.print("failed to import items".prependIndent(INDENT))
+                }
+
+                success
+            }
+        } else {
+            displaySampleFile(INVENTORY_SAMPLE)
+
+            false
+        }
+    }
+
+fun displaySampleFile(file: String) =
+    terminal.println(StringBuilder().apply {
+        appendLine()
+        appendLine((TextColors.brightWhite) (file))
+        for (i in 0..10) {
+            appendLine((TextColors.blue) ("~"))
+        }
+    }.toString())
 
 fun clearItems() =
     inventory.clearItems().let { (success, message) ->
