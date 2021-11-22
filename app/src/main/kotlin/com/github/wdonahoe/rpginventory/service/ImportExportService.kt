@@ -1,6 +1,7 @@
 package com.github.wdonahoe.rpginventory.service
 
 import com.github.wdonahoe.rpginventory.ProfileManager
+import com.github.wdonahoe.rpginventory.model.Item
 import java.io.*
 import java.io.File
 import java.util.zip.ZipEntry
@@ -44,4 +45,14 @@ class ImportExportService(
 
     fun import(path: String) =
         Triple(false, "failure", "")
+
+    fun importItems(path: String): Pair<Boolean, List<Item>> {
+        return try {
+            inventoryFileService.readAll(DiskFile(File(path)).reader).let { items ->
+                true to items
+            }
+        } catch (ex: Exception) {
+            false to listOf()
+        }
+    }
 }

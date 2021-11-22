@@ -138,9 +138,9 @@ class Prompt(private val profileManager: ProfileManager) {
             ADD_ITEM_ENTER_UNITS.prependProfile(),
         )
 
-    private fun addItemQuantity() =
+    private fun addItemQuantity(unit: String? = null) =
         KInquirer.promptInputNumber(
-            ADD_ITEM_QUANTITY.prependProfile()
+            "$ADD_ITEM_QUANTITY${if (unit != null) " ($unit)" else ""}?".prependProfile()
         )
 
     fun addItem(inventory: Inventory, prompt: String = ADD_ITEM_HEADER) =
@@ -151,7 +151,7 @@ class Prompt(private val profileManager: ProfileManager) {
                 if (hasUnit) {
                     val unit = existingUnit ?: addItemUnit()
 
-                    Item(itemName, addItemQuantity().toDouble(), unit)
+                    Item(itemName, addItemQuantity(unit).toDouble(), unit)
                 } else {
                     Item(itemName, addItemQuantity().toDouble(), "")
                 }
@@ -310,4 +310,9 @@ class Prompt(private val profileManager: ProfileManager) {
 
     private fun String.removeProfile() =
         removePrefix("(${profileManager.currentProfile.name}) ")
+
+    fun importItems() =
+        KInquirer.promptInput(
+            "Type the path of a CSV file containing the items.",
+        )
 }

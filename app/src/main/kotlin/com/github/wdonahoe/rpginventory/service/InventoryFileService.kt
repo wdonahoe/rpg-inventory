@@ -6,6 +6,7 @@ import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVPrinter
 import java.io.BufferedReader
 import java.io.BufferedWriter
+import java.io.Reader
 import java.nio.file.Files
 import java.nio.file.StandardOpenOption
 import java.io.File as JavaFile
@@ -19,8 +20,8 @@ class InventoryFileService(val inventoryFile: File) {
                 CSVFormat.DEFAULT
             )
 
-    fun readAll() =
-        BufferedReader(inventoryFile.reader).use { reader ->
+    fun readAll(fileReader: Reader? = null) =
+        BufferedReader(fileReader ?: inventoryFile.reader).use { reader ->
             CSVParser(
                 reader,
                 CSVFormat.DEFAULT

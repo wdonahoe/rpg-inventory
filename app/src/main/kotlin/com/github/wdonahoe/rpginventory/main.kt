@@ -168,13 +168,29 @@ fun displayAdvanced() {
 
         val success = when (action) {
             Action.ImportProfile -> importProfile()
-            Action.ExportProfile -> exportProfile()
+            Action.ImportItems   -> importItems()
             Action.ClearItems    -> clearItems()
             Action.ClearRecipes  -> clearRecipes()
+            Action.ExportProfile -> exportProfile()
             else                 -> true
         }
     } while (action != Action.Back || !success)
 }
+
+fun importItems() =
+    prompt.importItems().let { path ->
+        importExportService.importItems(path).let { (success, items) ->
+            if (success) {
+                inventory.addItems(items)
+
+                terminal.println("items imported!".prependIndent(INDENT))
+            } else {
+                terminal.print("failed to import items".prependIndent(INDENT))
+            }
+
+            success
+        }
+    }
 
 fun clearItems() =
     inventory.clearItems().let { (success, message) ->

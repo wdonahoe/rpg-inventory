@@ -146,4 +146,26 @@ class InventoryTests {
             Assert.assertEquals(items.size, 0)
         }
     }
+
+    @Test
+    fun testClearRecipes() {
+        with(inventory) {
+            addRecipe(
+                Recipe(
+                    "potion",
+                    listOf(
+                        Item("a", 2.0, null),
+                        Item("b", 4.0, null),
+                        Item("c", 2.0, "oz"),
+                    )
+                )
+            )
+
+            Assert.assertEquals(recipes.size, 1)
+
+            clearRecipes()
+
+            Assert.assertEquals(recipes.size, 0)
+        }
+    }
 }

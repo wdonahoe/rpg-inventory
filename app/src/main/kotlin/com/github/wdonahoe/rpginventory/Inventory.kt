@@ -31,7 +31,15 @@ class Inventory(
     val recipes : List<RecipeStatus>
         get() = _recipes
 
-    fun addItem(item: Item) {
+    fun addItems(items: List<Item>) {
+        for (item in items) {
+            addItem(item)
+        }
+
+        inventoryService.writeItems(this.items)
+    }
+
+    fun addItem(item: Item, write: Boolean = true) {
         val existingIndex = items.indexOfFirst {
             it.name.equals(item.name, ignoreCase = true) && (it.unit == null || it.unit == item.unit)
         }
@@ -44,7 +52,9 @@ class Inventory(
 
         _recipes = _recipes.map { getRecipeStatus(it.recipe) }.toMutableList()
 
-        inventoryService.writeItems(items)
+        if (write) {
+            inventoryService.writeItems(items)
+        }
     }
 
     fun addRecipe(recipe: Recipe) {
@@ -54,7 +64,7 @@ class Inventory(
     }
 
     fun getUnit(itemName: String) =
-        items.firstOrNull { it.name == itemName }?.unit
+        items.firstOrNull { it.name == itemName }?.unit ?: recipes.firstOrNull { it.recipe.ingredients.any { ingredient -> ingredient.name == itemName} }?.recipe?.ingredients?.first { it.name == itemName }?.unit
 
     private fun getRecipeStatus(recipe: Recipe) =
         RecipeStatus(
