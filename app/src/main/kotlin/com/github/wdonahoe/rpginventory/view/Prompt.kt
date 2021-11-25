@@ -195,7 +195,7 @@ class Prompt(private val profileManager: ProfileManager) {
         StringBuilder().apply {
             val indent = recipeStatus.recipe.ingredients.maxOf { it.name.length } + 1
 
-            appendLine()
+            appendLine((brightRed) ("Unable to craft ${recipeStatus.recipe.itemName}. Here is a summary of the missing ingredients:"))
 
             recipeStatus.recipe.ingredients.filter { ingredient ->
                 recipeStatus.missingIngredients.none { (item, _) -> item.name == ingredient.name }

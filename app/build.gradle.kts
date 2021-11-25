@@ -22,6 +22,7 @@ dependencies {
     implementation("commons-io:commons-io:2.5")
     implementation("com.github.kotlin-inquirer:kotlin-inquirer:v0.0.2-alpha")
     implementation("com.github.ajalt.mordant:mordant:2.0.0-beta2")
+    implementation("com.github.ajalt.clikt:clikt:3.3.0")
     implementation("com.jakewharton.picnic:picnic:0.5.0")
 
     testImplementation(kotlin("test"))

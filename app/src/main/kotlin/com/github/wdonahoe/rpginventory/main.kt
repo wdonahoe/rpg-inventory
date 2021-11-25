@@ -1,10 +1,8 @@
 package com.github.wdonahoe.rpginventory
 
+import com.github.ajalt.clikt.core.subcommands
 import com.github.ajalt.mordant.rendering.TextColors
-import com.github.ajalt.mordant.rendering.TextStyles
 import com.github.ajalt.mordant.terminal.Terminal
-import com.github.wdonahoe.rpginventory.commandline.*
-import com.github.wdonahoe.rpginventory.commandline.List
 import com.github.wdonahoe.rpginventory.service.ImportExportService
 import com.github.wdonahoe.rpginventory.service.InventoryFileService
 import com.github.wdonahoe.rpginventory.service.RecipeFileService
@@ -53,6 +51,18 @@ fun main(args: Array<String>) {
     } else {
         handleArgs(args)
     }
+}
+
+@ExperimentalCli
+fun handleArgs(args: Array<String>) {
+    Profile()
+        .subcommands(
+            AddItem(),
+            CraftItem(prompt),
+            ListItems(prompt),
+            Import()
+        )
+        .main(args)
 }
 
 fun startInteractiveMode() {
@@ -230,7 +240,7 @@ fun displaySampleFile(file: String) =
     terminal.println(StringBuilder().apply {
         appendLine()
         appendLine((TextColors.brightWhite) (file))
-        for (i in 0..10) {
+        for (i in 0..7) {
             appendLine((TextColors.blue) ("~"))
         }
     }.toString())
@@ -290,33 +300,6 @@ fun importProfile() : Boolean {
 //    }
 }
 
-@ExperimentalCli
-fun handleArgs(args: Array<String>) {
-    val parser = ArgParser("inventory", strictSubcommandOptionsOrder = true)
-
-    val add = Add()
-    val list = List()
-    val clear = Clear()
-    val export = Export()
-
-    parser.subcommands(add, list, clear, export)
-
-    when (parser.parse(args).commandName) {
-        add.name -> add.result?.withUnit()?.also(inventory::addItem) ?: warn()
-        list.name -> printInventory()
-        //clearItems.name -> inventory.clearItems().also(::clearStatus)
-        //export.name -> inventoryFile.export(export.path).also { exportStatus(export.path, it) }
-    }
-}
-
-fun clearStatus(cleared: Boolean) {
-    if (cleared) {
-        println("Inventory cleared!")
-    } else {
-        println("The inventoryFile could not be cleared.")
-    }
-}
-
 fun printInventory() {
     inventory.apply {
         if (items.none()) {
@@ -348,8 +331,4 @@ fun printInventory() {
             System.out.format("+----------------------------------+----------+%n")
         }
     }
-}
-
-fun warn() {
-    println("warning: the item was not added")
 }
