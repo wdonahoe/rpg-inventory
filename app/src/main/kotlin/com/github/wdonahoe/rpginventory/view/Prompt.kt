@@ -189,13 +189,19 @@ class Prompt(private val profileManager: ProfileManager) {
             ifEmpty { null }
         }
 
-    fun importProfile() = ""
+    fun importProfile() =
+        KInquirer.promptInput(
+            IMPORT_PROFILE,
+            hint = "press enter to cancel"
+        ).run {
+            ifEmpty { null }
+        }
 
     fun displayRecipeDiff(recipeStatus: RecipeStatus) =
         StringBuilder().apply {
             val indent = recipeStatus.recipe.ingredients.maxOf { it.name.length } + 1
 
-            appendLine((brightRed) ("Unable to craft ${recipeStatus.recipe.itemName}. Here is a summary of the missing ingredients:"))
+            appendLine((brightRed) ("Unable to craft ${recipeStatus.recipe.itemName}. Here is a summary of missing ingredients:"))
 
             recipeStatus.recipe.ingredients.filter { ingredient ->
                 recipeStatus.missingIngredients.none { (item, _) -> item.name == ingredient.name }
@@ -244,15 +250,6 @@ class Prompt(private val profileManager: ProfileManager) {
 
             Recipe(recipeName, ingredients)
         }
-
-    private fun removeOneOrMoreItems(items: List<Item>) =
-        KInquirer.promptListMulti(
-            "Select the item(s) you wish to remove".prependProfile(),
-            items.map { it.name },
-        )
-
-    fun removeItems(items: List<Item>) =
-        removeOneOrMoreItems(items) // TODO: if only one result, specify quantity to remove
 
     fun displayItem(item: Item) =
         table {

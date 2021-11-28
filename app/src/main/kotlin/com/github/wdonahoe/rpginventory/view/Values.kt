@@ -35,8 +35,8 @@ object Values {
 
     const val IMPORT_PROFILE = "Import a profile (a zip archive containing recipes.json and inventory.csv)"
     const val EXPORT_PROFILE = "Export your profile to a zip archive"
-    const val IMPORT_ITEMS = "Bulk import items from a csv file"
-    const val IMPORT_RECIPES = "Bulk import recipes from a json file"
+    const val IMPORT_ITEMS = "Bulk importProfile items from a csv file"
+    const val IMPORT_RECIPES = "Bulk importProfile recipes from a json file"
     const val CLEAR_INVENTORY = "Clear all items from your inventory"
     const val CLEAR_RECIPES = "Clear all recipes from your inventory"
 

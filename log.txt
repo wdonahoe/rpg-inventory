@@ -1,1 +1,3 @@
-recipes imported!
+Usage: import-profile [OPTIONS] ZIPFILE
+
+Error: Invalid value for "ZIPFILE": Path "import-profile" does not exist.

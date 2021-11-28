@@ -1,5 +1,6 @@
 package com.github.wdonahoe.rpginventory
 
+import com.github.ajalt.clikt.core.UsageError
 import com.github.ajalt.clikt.core.subcommands
 import com.github.ajalt.mordant.rendering.TextColors
 import com.github.ajalt.mordant.terminal.Terminal
@@ -16,7 +17,6 @@ import com.github.wdonahoe.rpginventory.view.Values.INVENTORY_SAMPLE
 import com.github.wdonahoe.rpginventory.view.Values.RECIPES_SAMPLE
 import com.yg.kotlin.inquirer.components.promptInput
 import com.yg.kotlin.inquirer.core.KInquirer
-import kotlinx.cli.ArgParser
 import kotlinx.cli.ExperimentalCli
 import java.text.DecimalFormat
 
@@ -55,14 +55,18 @@ fun main(args: Array<String>) {
 
 @ExperimentalCli
 fun handleArgs(args: Array<String>) {
-    Profile()
-        .subcommands(
-            AddItem(),
-            CraftItem(prompt),
-            ListItems(prompt),
-            Import()
-        )
-        .main(args)
+    if (args.any { it.endsWith("zip", ignoreCase = true)}) {
+        ImportProfile().main(args)
+    } else {
+        Profile()
+            .subcommands(
+                AddItem(),
+                CraftItem(prompt),
+                ListItems(prompt),
+                Import()
+            )
+            .main(args)
+    }
 }
 
 fun startInteractiveMode() {
@@ -74,7 +78,7 @@ fun startInteractiveMode() {
         }
 
         setInitialProfile()
-        initializeInventory()
+        inventory = initializeInventory()
 
         do {
             val action = prompt.primaryActions
@@ -84,7 +88,6 @@ fun startInteractiveMode() {
                 Action.AddItem          -> addItem()
                 Action.CraftItem        -> craftItem()
                 Action.AddRecipe        -> addRecipe()
-                Action.RemoveItem       -> removeItems()
                 Action.ListItems        -> listItems()
                 Action.Advanced         -> displayAdvanced()
                 else -> { }
@@ -112,12 +115,6 @@ fun addRecipe() {
     }
 }
 
-fun removeItems() {
-    val toRemove = prompt.removeItems(inventory.items)
-
-    inventory.removeAllItems(toRemove)
-}
-
 fun listItems() {
     terminal.println(prompt.displayItems(inventory.items))
 }
@@ -137,11 +134,11 @@ fun selectOrCreateProfile() {
         setInitialProfile()
     }
 
-    initializeInventory()
+    inventory = initializeInventory()
 }
 
-fun initializeInventory() {
-    inventory = Inventory(
+fun initializeInventory() =
+    Inventory(
         InventoryFileService(
             FileUtil.getInventoryFile(
                 profileManager.currentProfile
@@ -153,7 +150,6 @@ fun initializeInventory() {
             )
         )
     )
-}
 
 fun setInitialProfile() {
     if (profileManager.profiles.size > 1){
@@ -201,7 +197,7 @@ fun importRecipes() =
 
                     terminal.println("recipes imported!".prependIndent(INDENT))
                 } else {
-                    terminal.print("failed to import recipes".prependIndent(INDENT))
+                    terminal.print("failed to importProfile recipes".prependIndent(INDENT))
                 }
 
                 success
@@ -224,7 +220,7 @@ fun importItems() =
 
                     terminal.println("items imported!".prependIndent(INDENT))
                 } else {
-                    terminal.print("failed to import items".prependIndent(INDENT))
+                    terminal.print("failed to importProfile items".prependIndent(INDENT))
                 }
 
                 success
@@ -282,22 +278,23 @@ fun exportProfile() : Boolean {
 }
 
 fun importProfile() : Boolean {
-    return true
-//    val importPath = prompt.importProfile()
-//
-//    return if (importPath != null) {
-//        val (success, message, profile) = importExportService.import(importPath)
-//
-//        terminal.println(message)
-//
-//        if (success) {
-//            profileManager.setProfile(profile)
-//        }
-//
-//        success
-//    } else {
-//        false
-//    }
+    val importPath = prompt.importProfile()
+
+    if (importPath != null) {
+        val (success, message) = profileManager.importProfile(importPath)
+
+        if (success) {
+            inventory = initializeInventory()
+
+            terminal.println("profile \"${profileManager.currentProfile.name}\" imported!")
+        } else {
+            terminal.println("import failed: $message")
+        }
+
+        return success
+    }
+
+    return false
 }
 
 fun printInventory() {

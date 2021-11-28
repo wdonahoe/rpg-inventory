@@ -2,9 +2,11 @@ package com.github.wdonahoe.rpginventory.service
 
 import com.github.wdonahoe.rpginventory.ProfileManager
 import com.github.wdonahoe.rpginventory.model.Item
+import com.github.wdonahoe.rpginventory.util.FileUtil
 import java.io.*
 import java.io.File
 import java.util.zip.ZipEntry
+import java.util.zip.ZipFile
 import java.util.zip.ZipOutputStream
 
 class ImportExportService(
@@ -31,7 +33,7 @@ class ImportExportService(
                             BufferedInputStream(f).use { origin ->
                                 out.putNextEntry(ZipEntry(file.name))
 
-                                origin.copyTo(out, 1024)
+                                origin.copyTo(out, 2048)
                             }
                         }
                     }
@@ -42,9 +44,6 @@ class ImportExportService(
         } catch (ex: Exception) {
             false to "Export failed: ${ex.message}"
         }
-
-    fun import(path: String) =
-        Triple(false, "failure", "")
 
     fun importItems(path: String) =
         try {

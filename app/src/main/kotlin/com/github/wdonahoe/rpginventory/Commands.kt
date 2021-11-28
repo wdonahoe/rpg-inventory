@@ -122,7 +122,7 @@ class Import : CliktCommand("import items and recipes", name = "import") {
                     echo("items imported!")
                 }
                 else {
-                    echo("failed to import items!")
+                    echo("failed to importProfile items!")
                 }
             }
         } catch (ex: IOException) {
@@ -143,7 +143,7 @@ class Import : CliktCommand("import items and recipes", name = "import") {
 
                         echo("recipes imported!")
                     } else {
-                        echo("failed to import recipes!")
+                        echo("failed to importProfile recipes!")
                     }
                 }
             }
@@ -158,6 +158,27 @@ class ListItems(private val prompt: Prompt): CliktCommand(LIST_ITEMS, name = "li
 
     override fun run() =
         echo(prompt.displayItems(context.inventory.items))
+}
+
+class ImportProfile: CliktCommand("import a profile (.zip)") {
+    val zipFile by argument().file(mustExist = true)
+
+    override fun run() {
+        ProfileManager(
+            TableOfContentsFileService(
+                FileUtil.getTableOfContentsFile(),
+                profileCreatedCallback = FileUtil::getProfileDataFolder
+            )
+        ).apply {
+            importProfile(zipFile.absolutePath).let { (success, message) ->
+                if (success) {
+                    echo("success")
+                } else {
+                    echo("fail")
+                }
+            }
+        }
+    }
 }
 
 data class CommandContext(

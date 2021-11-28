@@ -13,7 +13,7 @@ object FileUtil {
     private const val INVENTORY_CSV = "inventory.csv"
     private const val RECIPES_JSON = "recipes.json"
 
-    private val rootDir by lazy {
+    val rootDir by lazy {
         (if (SystemUtils.IS_OS_WINDOWS) {
             File(FilenameUtils.concat(System.getenv("APPDATA"), DATA_DIR))
         } else {
