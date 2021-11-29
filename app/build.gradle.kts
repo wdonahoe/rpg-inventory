@@ -24,6 +24,7 @@ dependencies {
     implementation("com.github.ajalt.mordant:mordant:2.0.0-beta2")
     implementation("com.github.ajalt.clikt:clikt:3.3.0")
     implementation("com.jakewharton.picnic:picnic:0.5.0")
+    implementation("org.jline:jline:3.1.3")
 
     testImplementation(kotlin("test"))
     testImplementation("org.mockito.kotlin:mockito-kotlin:3.2.0")

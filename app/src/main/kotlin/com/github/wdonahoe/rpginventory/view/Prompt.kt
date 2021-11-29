@@ -1,5 +1,8 @@
 package com.github.wdonahoe.rpginventory.view
 
+import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.parameters.arguments.argument
+import com.github.ajalt.clikt.parameters.types.file
 import com.github.ajalt.mordant.rendering.TextColors.*
 import com.github.ajalt.mordant.rendering.TextStyles.bold
 import com.github.wdonahoe.rpginventory.Inventory
@@ -45,6 +48,13 @@ import com.jakewharton.picnic.TableSectionDsl
 import com.jakewharton.picnic.table
 import com.yg.kotlin.inquirer.components.*
 import com.yg.kotlin.inquirer.core.KInquirer
+import jdk.nashorn.internal.ir.Terminal
+import org.jline.builtins.Completers
+import org.jline.reader.LineReaderBuilder
+import org.jline.reader.impl.DefaultParser
+import org.jline.terminal.TerminalBuilder
+import java.io.File
+import java.nio.file.Paths
 
 class Prompt(private val profileManager: ProfileManager) {
 
@@ -189,13 +199,22 @@ class Prompt(private val profileManager: ProfileManager) {
             ifEmpty { null }
         }
 
-    fun importProfile() =
-        KInquirer.promptInput(
-            IMPORT_PROFILE,
-            hint = "press enter to cancel"
-        ).run {
-            ifEmpty { null }
-        }
+    fun importProfile(): String? {
+        println((gray) ("type the path to zip file (tab to display auto-completions)"))
+
+        return readFileOrNull()
+    }
+
+    private fun readFileOrNull() =
+        LineReaderBuilder
+            .builder()
+            .terminal(TerminalBuilder.builder().build())
+            .completer(Completers.FilesCompleter(Paths.get("")))
+            .parser(DefaultParser())
+            .build()
+            .readLine().run {
+                ifEmpty { null }
+            }
 
     fun displayRecipeDiff(recipeStatus: RecipeStatus) =
         StringBuilder().apply {
@@ -305,22 +324,15 @@ class Prompt(private val profileManager: ProfileManager) {
     private fun String.prependProfile() =
         "(${magenta(profileManager.currentProfile.name)}) $this"
 
-    private fun String.removeProfile() =
-        removePrefix("(${profileManager.currentProfile.name}) ")
+    fun importItems(): String? {
+        println((gray) ("type the path to a CSV file containing items (tab to display auto-completions)"))
 
-    fun importItems() =
-        KInquirer.promptInput(
-            "Type the path of a CSV file containing the items.",
-            hint = "Press enter to see a sample"
-        ).run {
-            ifEmpty { null }
-        }
+        return readFileOrNull()
+    }
 
-    fun importRecipes() =
-        KInquirer.promptInput(
-            "Type the path of a JSON file containing the recipes.",
-            hint = "Press enter to see a sample"
-        ).run {
-            ifEmpty { null }
-        }
+    fun importRecipes(): String? {
+        println((gray) ("type the path to a JSON file that contains recipes (tab to display auto-completions)"))
+
+        return readFileOrNull()
+    }
 }
