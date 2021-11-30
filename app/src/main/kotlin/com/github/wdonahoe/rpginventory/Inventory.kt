@@ -77,7 +77,7 @@ class Inventory(
                     it to getIngredientQuantityRemaining(it)
                 }
                 .filter { (_, quantityRemaining) ->
-                    quantityRemaining != 0.0
+                    quantityRemaining > 0
                 }
         )
 

@@ -156,6 +156,8 @@ fun setInitialProfile() {
         val selection = prompt.selectProfile()
         if (selection.operation == ProfileSelection.Operation.CreateNewProfile) {
             createNewProfile()
+        } else if (selection.operation == ProfileSelection.Operation.ImportProfile) {
+            importProfile()
         } else {
             profileManager.setProfile(selection.profile)
         }

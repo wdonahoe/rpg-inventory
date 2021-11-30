@@ -1,8 +1,5 @@
 package com.github.wdonahoe.rpginventory.view
 
-import com.github.ajalt.clikt.core.CliktCommand
-import com.github.ajalt.clikt.parameters.arguments.argument
-import com.github.ajalt.clikt.parameters.types.file
 import com.github.ajalt.mordant.rendering.TextColors.*
 import com.github.ajalt.mordant.rendering.TextStyles.bold
 import com.github.wdonahoe.rpginventory.Inventory
@@ -48,12 +45,15 @@ import com.jakewharton.picnic.TableSectionDsl
 import com.jakewharton.picnic.table
 import com.yg.kotlin.inquirer.components.*
 import com.yg.kotlin.inquirer.core.KInquirer
-import jdk.nashorn.internal.ir.Terminal
+import com.yg.kotlin.inquirer.core.style
 import org.jline.builtins.Completers
+import org.jline.reader.Highlighter
+import org.jline.reader.LineReader
 import org.jline.reader.LineReaderBuilder
 import org.jline.reader.impl.DefaultParser
+import org.jline.reader.impl.completer.StringsCompleter
 import org.jline.terminal.TerminalBuilder
-import java.io.File
+import org.jline.widget.AutosuggestionWidgets
 import java.nio.file.Paths
 
 class Prompt(private val profileManager: ProfileManager) {
@@ -77,10 +77,13 @@ class Prompt(private val profileManager: ProfileManager) {
                 " ${index + 1}) ${profile.name}"
             }.plus(
                 CREATE_PROFILE_OPTION
+            ).plus(
+                IMPORT_PROFILE
             )
         ).run {
             when(this) {
                 CREATE_PROFILE_OPTION -> ProfileSelection(ProfileSelection.Operation.CreateNewProfile)
+                IMPORT_PROFILE -> ProfileSelection(ProfileSelection.Operation.ImportProfile)
                 else -> ProfileSelection(ProfileSelection.Operation.SelectProfile, split(")")[1].trim())
             }
         }
@@ -130,12 +133,29 @@ class Prompt(private val profileManager: ProfileManager) {
             )
         )
 
-    private fun addItemName(prompt: String) =
-        KInquirer.promptInput(
-            prompt.prependProfile(),
-            validation = String::isNotBlank,
-            hint = ADD_ITEM_HINT
-        ).trim()
+    private fun addItemName(prompt: String, items: List<String>) =
+        TerminalBuilder.builder().build().use { terminal ->
+            println((brightGreen)("?") + " ${prompt.prependProfile()}")
+
+            LineReaderBuilder
+                .builder()
+                .option(LineReader.Option.GROUP, false)
+                .option(LineReader.Option.AUTO_GROUP, false)
+                .option(LineReader.Option.CASE_INSENSITIVE, true)
+                .terminal(terminal)
+                .completer(StringsCompleter(items))
+                .parser(DefaultParser().apply {
+                    escapeChars = null
+                })
+                .build().run {
+                    AutosuggestionWidgets(this).apply {
+                        enable()
+                        setSuggestionType(LineReader.SuggestionType.COMPLETER)
+                    }
+
+                    readLine().trim().removeSurrounding("'")
+                }
+        }
 
     private fun addItemHasUnit() =
         KInquirer.promptConfirm(
@@ -150,11 +170,17 @@ class Prompt(private val profileManager: ProfileManager) {
 
     private fun addItemQuantity(unit: String? = null) =
         KInquirer.promptInputNumber(
-            "$ADD_ITEM_QUANTITY${if (unit != null) " ($unit)" else ""}?".prependProfile()
+            "$ADD_ITEM_QUANTITY${if (unit?.isNotEmpty() == true) " (${getPlural(unit)})" else ""}?".prependProfile()
         )
 
+    private fun getPlural(unit: String) =
+        if (unit.endsWith("s") || unit.length <= 2)
+            unit
+        else
+            "${unit}s"
+
     fun addItem(inventory: Inventory, prompt: String = ADD_ITEM_HEADER) =
-        addItemName(prompt).let { itemName ->
+        addItemName(prompt, getItemsAndIngredients(inventory)).let { itemName ->
             val existingUnit = inventory.getUnit(itemName)
 
             (if (existingUnit != null) true else addItemHasUnit()).let { hasUnit ->
@@ -167,6 +193,12 @@ class Prompt(private val profileManager: ProfileManager) {
                 }
             }
         }
+
+    private fun getItemsAndIngredients(inventory: Inventory): List<String> {
+        val items = inventory.items.map { it.name }
+        val ingredients = inventory.recipes.flatMap { it.recipe.ingredients }.map { it.name }
+        return items.plus(ingredients).toSet().toList().sortedBy { it }
+    }
 
     private fun addRecipeName() =
         KInquirer.promptInput(
@@ -199,22 +231,30 @@ class Prompt(private val profileManager: ProfileManager) {
             ifEmpty { null }
         }
 
-    fun importProfile(): String? {
-        println((gray) ("type the path to zip file (tab to display auto-completions)"))
+    fun importProfile() =
+        readFileOrNull("type the path to zip file (tab to display auto-completions)")
 
-        return readFileOrNull()
+    fun importItems() =
+        readFileOrNull("type the path to a CSV file containing items (tab to display auto-completions)")
+
+    fun importRecipes() =
+        readFileOrNull("type the path to a JSON file that contains recipes (tab to display auto-completions)")
+
+    private fun readFileOrNull(message: String): String? {
+        println((gray)(message))
+
+        return TerminalBuilder.builder().build().use { terminal ->
+            LineReaderBuilder
+                .builder()
+                .terminal(terminal)
+                .completer(Completers.FilesCompleter(Paths.get("")))
+                .parser(DefaultParser())
+                .build()
+                .readLine().run {
+                    ifEmpty { null }
+                }?.trim()
+        }
     }
-
-    private fun readFileOrNull() =
-        LineReaderBuilder
-            .builder()
-            .terminal(TerminalBuilder.builder().build())
-            .completer(Completers.FilesCompleter(Paths.get("")))
-            .parser(DefaultParser())
-            .build()
-            .readLine().run {
-                ifEmpty { null }
-            }
 
     fun displayRecipeDiff(recipeStatus: RecipeStatus) =
         StringBuilder().apply {
@@ -223,7 +263,7 @@ class Prompt(private val profileManager: ProfileManager) {
             appendLine((brightRed) ("Unable to craft ${recipeStatus.recipe.itemName}. Here is a summary of missing ingredients:"))
 
             recipeStatus.recipe.ingredients.filter { ingredient ->
-                recipeStatus.missingIngredients.none { (item, _) -> item.name == ingredient.name }
+                recipeStatus.missingIngredients.none { (item, _) -> item.name.equals(ingredient.name, ignoreCase = true) }
             }.forEach { ingredient ->
                 appendLine(
                     (brightGreen) ("+++ ${ingredient.name}${" ".repeat(indent - ingredient.name.length)}(${displayItemQuantity(ingredient.quantity)} ${ingredient.unit})")
@@ -322,17 +362,5 @@ class Prompt(private val profileManager: ProfileManager) {
         }
 
     private fun String.prependProfile() =
-        "(${magenta(profileManager.currentProfile.name)}) $this"
-
-    fun importItems(): String? {
-        println((gray) ("type the path to a CSV file containing items (tab to display auto-completions)"))
-
-        return readFileOrNull()
-    }
-
-    fun importRecipes(): String? {
-        println((gray) ("type the path to a JSON file that contains recipes (tab to display auto-completions)"))
-
-        return readFileOrNull()
-    }
+        "(${(magenta + bold)(profileManager.currentProfile.name)}) $this"
 }

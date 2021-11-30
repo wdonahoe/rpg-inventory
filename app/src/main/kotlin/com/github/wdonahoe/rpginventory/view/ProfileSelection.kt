@@ -6,6 +6,7 @@ data class ProfileSelection(
 ) {
     enum class Operation {
         CreateNewProfile,
-        SelectProfile
+        SelectProfile,
+        ImportProfile
     }
 }

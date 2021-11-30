@@ -1,3 +1,22 @@
-Usage: import-profile [OPTIONS] ZIPFILE
-
-Error: Invalid value for "ZIPFILE": Path "import-profile" does not exist.
+Welcome to RPG Inventory!
+? Select your profile:   
+ ?  1) Michael Gray
+    2) profile
+   Create a new profileNov 28, 2021 9:20:33 PM org.jline.utils.Log logr
+WARNING: Unable to create a system terminal, creating a dumb terminal (enable debug logging for more information)
+? Select your profile:   
+ ?  1) Michael Gray
+    2) profile
+   Create a new profile? Select your profile:   
+ ?  1) Michael Gray
+    2) profile
+   Create a new profile? Select your profile:   
+ ?  1) Michael Gray
+    2) profile
+   Create a new profile? Select your profile:   
+ ?  1) Michael Gray
+    2) profile
+   Create a new profile? Select your profile:   
+ ?  1) Michael Gray
+    2) profile
+   Create a new profile

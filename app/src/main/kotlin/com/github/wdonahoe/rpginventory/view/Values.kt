@@ -21,7 +21,7 @@ object Values {
     const val CANCEL = "Cancel"
     const val BACK = "Back"
 
-    const val ADD_ITEM_HEADER = "What is the name of the item?"
+    const val ADD_ITEM_HEADER = "What is the name of the item? (press tab to display auto-completions)"
     const val ADD_ITEM_HINT = "type the name"
     const val ADD_ITEM_UNITS = "Does it have a unit? (e.g. ounce, gram etc.)"
     const val ADD_ITEM_ENTER_UNITS = "Enter the unit:"
