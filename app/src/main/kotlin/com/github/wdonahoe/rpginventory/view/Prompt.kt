@@ -36,7 +36,6 @@ import com.github.wdonahoe.rpginventory.view.Values.IMPORT_PROFILE
 import com.github.wdonahoe.rpginventory.view.Values.IMPORT_RECIPES
 import com.github.wdonahoe.rpginventory.view.Values.INDENT
 import com.github.wdonahoe.rpginventory.view.Values.LIST_ITEMS
-import com.github.wdonahoe.rpginventory.view.Values.REMOVE_ITEMS
 import com.github.wdonahoe.rpginventory.view.Values.SELECT_PROFILE_PROMPT
 import com.github.wdonahoe.rpginventory.view.Values.SWITCH_PROFILE
 import com.github.wdonahoe.rpginventory.view.Values.TABLE_PADDING
@@ -45,15 +44,16 @@ import com.jakewharton.picnic.TableSectionDsl
 import com.jakewharton.picnic.table
 import com.yg.kotlin.inquirer.components.*
 import com.yg.kotlin.inquirer.core.KInquirer
-import com.yg.kotlin.inquirer.core.style
 import org.jline.builtins.Completers
-import org.jline.reader.Highlighter
 import org.jline.reader.LineReader
 import org.jline.reader.LineReaderBuilder
 import org.jline.reader.impl.DefaultParser
 import org.jline.reader.impl.completer.StringsCompleter
+import org.jline.terminal.Terminal
 import org.jline.terminal.TerminalBuilder
 import org.jline.widget.AutosuggestionWidgets
+import java.io.File
+import java.nio.file.Path
 import java.nio.file.Paths
 
 class Prompt(private val profileManager: ProfileManager) {
@@ -111,7 +111,6 @@ class Prompt(private val profileManager: ProfileManager) {
                 ADD_ITEM        to Action.AddItem,
                 ADD_RECIPE      to Action.AddRecipe,
                 CRAFT_ITEM      to Action.CraftItem,
-                REMOVE_ITEMS    to Action.RemoveItem,
                 LIST_ITEMS      to Action.ListItems,
                 SWITCH_PROFILE  to Action.SelectNewProfile,
                 ADVANCED        to Action.Advanced,
@@ -126,9 +125,9 @@ class Prompt(private val profileManager: ProfileManager) {
                 IMPORT_ITEMS    to Action.ImportItems,
                 IMPORT_RECIPES  to Action.ImportRecipes,
                 IMPORT_PROFILE  to Action.ImportProfile,
+                EXPORT_PROFILE  to Action.ExportProfile,
                 CLEAR_INVENTORY to Action.ClearItems,
                 CLEAR_RECIPES   to Action.ClearRecipes,
-                EXPORT_PROFILE  to Action.ExportProfile,
                 BACK            to Action.Back
             )
         )
@@ -173,8 +172,8 @@ class Prompt(private val profileManager: ProfileManager) {
             "$ADD_ITEM_QUANTITY${if (unit?.isNotEmpty() == true) " (${getPlural(unit)})" else ""}?".prependProfile()
         )
 
-    private fun getPlural(unit: String) =
-        if (unit.endsWith("s") || unit.length <= 2)
+    private fun getPlural(unit: String, quantity: Double = 2.0) =
+        if (unit.endsWith("s") || unit.length <= 2 || quantity - 1.0 == 0.0)
             unit
         else
             "${unit}s"
@@ -223,13 +222,23 @@ class Prompt(private val profileManager: ProfileManager) {
 
     fun craftRecipe(recipes: List<RecipeStatus>) = selectRecipe(recipes)
 
-    fun exportProfile() =
-        KInquirer.promptInput(
-            EXPORT_PATH,
-            hint = "Press enter to cancel"
-        ).run {
-            ifEmpty { null }
+    fun exportProfile() : String {
+        println((gray)(EXPORT_PATH))
+
+        return TerminalBuilder.builder().build().use { terminal ->
+            lineReaderBuilder(terminal)
+                .completer(Completers.DirectoriesCompleter(File(System.getProperty("user.home"))))
+                .parser(DefaultParser())
+                .build().run {
+                    AutosuggestionWidgets(this).apply {
+                        enable()
+                        setSuggestionType(LineReader.SuggestionType.COMPLETER)
+                    }
+
+                    readLine().trim()
+                }
         }
+    }
 
     fun importProfile() =
         readFileOrNull("type the path to zip file (tab to display auto-completions)")
@@ -244,9 +253,7 @@ class Prompt(private val profileManager: ProfileManager) {
         println((gray)(message))
 
         return TerminalBuilder.builder().build().use { terminal ->
-            LineReaderBuilder
-                .builder()
-                .terminal(terminal)
+            lineReaderBuilder(terminal)
                 .completer(Completers.FilesCompleter(Paths.get("")))
                 .parser(DefaultParser())
                 .build()
@@ -266,12 +273,12 @@ class Prompt(private val profileManager: ProfileManager) {
                 recipeStatus.missingIngredients.none { (item, _) -> item.name.equals(ingredient.name, ignoreCase = true) }
             }.forEach { ingredient ->
                 appendLine(
-                    (brightGreen) ("+++ ${ingredient.name}${" ".repeat(indent - ingredient.name.length)}(${displayItemQuantity(ingredient.quantity)} ${ingredient.unit})")
+                    (brightGreen) ("+++ ${ingredient.name}${" ".repeat(indent - ingredient.name.length)}(${displayItemQuantity(ingredient.quantity)} ${getPlural(ingredient.unit ?: "", ingredient.quantity)})")
                 )
             }
             recipeStatus.missingIngredients.forEach { (item, quantityRemaining) ->
                 appendLine(
-                    (brightRed) ("--- ${item.name}${" ".repeat(indent - item.name.length)}(${displayItemQuantity(item.quantity - quantityRemaining)} / ${displayItemQuantity(item.quantity)}${if (item.unit.isNullOrBlank()) "" else " ${item.unit}"})")
+                    (brightRed) ("--- ${item.name}${" ".repeat(indent - item.name.length)}(${displayItemQuantity(item.quantity - quantityRemaining)} / ${displayItemQuantity(item.quantity)}${if (item.unit.isNullOrBlank()) "" else " ${getPlural(item.unit, item.quantity)}"})")
                 )
             }
             appendLine()
@@ -351,8 +358,16 @@ class Prompt(private val profileManager: ProfileManager) {
             }.toString()
         }.prependIndent(INDENT)
 
+    private fun lineReaderBuilder(terminal: Terminal) =
+        LineReaderBuilder
+            .builder()
+            .option(LineReader.Option.GROUP, false)
+            .option(LineReader.Option.AUTO_GROUP, false)
+            .option(LineReader.Option.CASE_INSENSITIVE, true)
+            .terminal(terminal)
+
     private fun displayItemRow(dsl: TableSectionDsl, item: Item) =
-        dsl.row(item.name, "${displayItemQuantity(item.quantity)} ${item.unit.orEmpty()}".trim())
+        dsl.row(item.name, "${displayItemQuantity(item.quantity)} ${getPlural(item.unit ?: "", item.quantity)}".trim())
 
     private fun displayItemQuantity(quantity: Double) =
         if (quantity.mod(1.0) == 0.0) {

@@ -21,7 +21,7 @@ object Values {
     const val CANCEL = "Cancel"
     const val BACK = "Back"
 
-    const val ADD_ITEM_HEADER = "What is the name of the item? (press tab to display auto-completions)"
+    const val ADD_ITEM_HEADER = "What is the name of the item? (start typing or press tab to display auto-completions)"
     const val ADD_ITEM_HINT = "type the name"
     const val ADD_ITEM_UNITS = "Does it have a unit? (e.g. ounce, gram etc.)"
     const val ADD_ITEM_ENTER_UNITS = "Enter the unit:"
@@ -34,13 +34,13 @@ object Values {
     const val FINISH_RECIPE = "Finish the recipe"
 
     const val IMPORT_PROFILE = "Import a profile (a zip archive containing recipes.json and inventory.csv)"
-    const val EXPORT_PROFILE = "Export your profile to a zip archive"
-    const val IMPORT_ITEMS = "Bulk importProfile items from a csv file"
-    const val IMPORT_RECIPES = "Bulk importProfile recipes from a json file"
+    const val EXPORT_PROFILE = "Export your profile"
+    const val IMPORT_ITEMS = "Import items from a csv file"
+    const val IMPORT_RECIPES = "Import recipes from a json file"
     const val CLEAR_INVENTORY = "Clear all items from your inventory"
     const val CLEAR_RECIPES = "Clear all recipes from your inventory"
 
-    const val EXPORT_PATH = "Enter the path of the directory you would like to export your profile to"
+    const val EXPORT_PATH = "Type the path to the folder you would like to export your profile to (start typing or press tab to display auto-completions, or press Enter to export to you home folder)"
 
     const val TABLE_PADDING = 2
     const val INDENT = "  "

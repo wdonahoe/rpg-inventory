@@ -154,12 +154,16 @@ fun initializeInventory() =
 fun setInitialProfile() {
     if (profileManager.profiles.size > 1){
         val selection = prompt.selectProfile()
-        if (selection.operation == ProfileSelection.Operation.CreateNewProfile) {
-            createNewProfile()
-        } else if (selection.operation == ProfileSelection.Operation.ImportProfile) {
-            importProfile()
-        } else {
-            profileManager.setProfile(selection.profile)
+        when (selection.operation) {
+            ProfileSelection.Operation.CreateNewProfile -> {
+                createNewProfile()
+            }
+            ProfileSelection.Operation.ImportProfile -> {
+                importProfile()
+            }
+            else -> {
+                profileManager.setProfile(selection.profile)
+            }
         }
     } else {
         profileManager.useFirstProfile()
@@ -199,7 +203,7 @@ fun importRecipes() =
 
                     terminal.println("recipes imported!".prependIndent(INDENT))
                 } else {
-                    terminal.print("failed to importProfile recipes".prependIndent(INDENT))
+                    terminal.print("failed to import recipes".prependIndent(INDENT))
                 }
 
                 success
@@ -222,7 +226,7 @@ fun importItems() =
 
                     terminal.println("items imported!".prependIndent(INDENT))
                 } else {
-                    terminal.print("failed to importProfile items".prependIndent(INDENT))
+                    terminal.print("failed to import items".prependIndent(INDENT))
                 }
 
                 success
@@ -266,17 +270,17 @@ fun clearRecipes() =
     }
 
 fun exportProfile() : Boolean {
-    val exportPath = prompt.exportProfile()
+    var exportPath = prompt.exportProfile()
 
-    return if (exportPath != null) {
-        val (success, message) = importExportService.export(exportPath)
-
-        terminal.println(message)
-
-        success
-    } else {
-        false
+    if (exportPath.isBlank()) {
+        exportPath = System.getProperty("user.home")
     }
+
+    val (success, message) = importExportService.export(exportPath)
+
+    terminal.println(message)
+
+    return success
 }
 
 fun importProfile() : Boolean {

@@ -122,7 +122,7 @@ class Import : CliktCommand("import items and recipes", name = "import") {
                     echo("items imported!")
                 }
                 else {
-                    echo("failed to importProfile items!")
+                    echo("failed to import items!")
                 }
             }
         } catch (ex: IOException) {
@@ -143,7 +143,7 @@ class Import : CliktCommand("import items and recipes", name = "import") {
 
                         echo("recipes imported!")
                     } else {
-                        echo("failed to importProfile recipes!")
+                        echo("failed to import recipes!")
                     }
                 }
             }
