@@ -22,3 +22,4 @@ local.properties
 # IntelliJ
 *.iml
 **/.idea/
+.run/
