@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-
 plugins {
     kotlin("jvm") version "2.0.0"
     kotlin("plugin.serialization") version "2.0.0"
@@ -15,10 +13,9 @@ repositories {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlinx:kotlinx-cli:0.3.6")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
     implementation("org.apache.commons:commons-lang3:3.14.0")
     implementation("org.apache.commons:commons-csv:1.11.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
     implementation("commons-io:commons-io:2.16.1")
     implementation("com.github.kotlin-inquirer:kotlin-inquirer:0.1.0")
     implementation("com.github.ajalt.mordant:mordant:2.7.1")
@@ -28,6 +25,7 @@ dependencies {
 
     testImplementation(kotlin("test"))
     testImplementation("org.mockito.kotlin:mockito-kotlin:3.2.0")
+    implementation(kotlin("script-runtime"))
 }
 
 tasks.test {
