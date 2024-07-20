@@ -1,9 +1,10 @@
 package com.github.wdonahoe.rpginventory
 
-import com.github.ajalt.clikt.core.UsageError
 import com.github.ajalt.clikt.core.subcommands
 import com.github.ajalt.mordant.rendering.TextColors
 import com.github.ajalt.mordant.terminal.Terminal
+import com.github.kinquirer.KInquirer
+import com.github.kinquirer.components.promptInput
 import com.github.wdonahoe.rpginventory.service.ImportExportService
 import com.github.wdonahoe.rpginventory.service.InventoryFileService
 import com.github.wdonahoe.rpginventory.service.RecipeFileService
@@ -15,9 +16,6 @@ import com.github.wdonahoe.rpginventory.view.Prompt
 import com.github.wdonahoe.rpginventory.view.Values.INDENT
 import com.github.wdonahoe.rpginventory.view.Values.INVENTORY_SAMPLE
 import com.github.wdonahoe.rpginventory.view.Values.RECIPES_SAMPLE
-import com.yg.kotlin.inquirer.components.promptInput
-import com.yg.kotlin.inquirer.core.KInquirer
-import kotlinx.cli.ExperimentalCli
 import java.text.DecimalFormat
 
 private val terminal = Terminal()
@@ -44,7 +42,6 @@ private val importExportService get() =
         inventory.recipeService
     )
 
-@ExperimentalCli
 fun main(args: Array<String>) {
     if (args.none()) {
         startInteractiveMode()
@@ -53,7 +50,6 @@ fun main(args: Array<String>) {
     }
 }
 
-@ExperimentalCli
 fun handleArgs(args: Array<String>) {
     if (args.any { it.endsWith("zip", ignoreCase = true)}) {
         ImportProfile().main(args)

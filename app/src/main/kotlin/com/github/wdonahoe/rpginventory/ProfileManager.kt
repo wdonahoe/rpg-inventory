@@ -5,7 +5,6 @@ import com.github.wdonahoe.rpginventory.service.TableOfContentsFileService
 import com.github.wdonahoe.rpginventory.util.FileUtil
 import org.apache.commons.io.FilenameUtils
 import java.io.File
-import java.io.FileReader
 import java.util.zip.ZipFile
 
 class ProfileManager(private val fileService: TableOfContentsFileService) {

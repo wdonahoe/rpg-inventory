@@ -2,6 +2,11 @@ package com.github.wdonahoe.rpginventory.view
 
 import com.github.ajalt.mordant.rendering.TextColors.*
 import com.github.ajalt.mordant.rendering.TextStyles.bold
+import com.github.kinquirer.KInquirer
+import com.github.kinquirer.components.promptConfirm
+import com.github.kinquirer.components.promptInput
+import com.github.kinquirer.components.promptInputNumber
+import com.github.kinquirer.components.promptList
 import com.github.wdonahoe.rpginventory.Inventory
 import com.github.wdonahoe.rpginventory.ProfileManager
 import com.github.wdonahoe.rpginventory.model.Item
@@ -42,8 +47,6 @@ import com.github.wdonahoe.rpginventory.view.Values.TABLE_PADDING
 import com.github.wdonahoe.rpginventory.view.Values.WELCOME
 import com.jakewharton.picnic.TableSectionDsl
 import com.jakewharton.picnic.table
-import com.yg.kotlin.inquirer.components.*
-import com.yg.kotlin.inquirer.core.KInquirer
 import org.jline.builtins.Completers
 import org.jline.reader.LineReader
 import org.jline.reader.LineReaderBuilder
@@ -53,7 +56,6 @@ import org.jline.terminal.Terminal
 import org.jline.terminal.TerminalBuilder
 import org.jline.widget.AutosuggestionWidgets
 import java.io.File
-import java.nio.file.Path
 import java.nio.file.Paths
 
 class Prompt(private val profileManager: ProfileManager) {
