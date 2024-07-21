@@ -2,11 +2,8 @@ package com.github.wdonahoe.rpginventory.view
 
 import com.github.ajalt.mordant.rendering.TextColors.*
 import com.github.ajalt.mordant.rendering.TextStyles.bold
-import com.github.kinquirer.KInquirer
-import com.github.kinquirer.components.promptConfirm
-import com.github.kinquirer.components.promptInput
-import com.github.kinquirer.components.promptInputNumber
-import com.github.kinquirer.components.promptList
+import com.yg.kotlin.inquirer.components.*
+import com.yg.kotlin.inquirer.core.KInquirer
 import com.github.wdonahoe.rpginventory.Inventory
 import com.github.wdonahoe.rpginventory.ProfileManager
 import com.github.wdonahoe.rpginventory.model.Item

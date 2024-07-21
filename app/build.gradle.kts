@@ -17,7 +17,7 @@ dependencies {
     implementation("org.apache.commons:commons-csv:1.11.0")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
     implementation("commons-io:commons-io:2.16.1")
-    implementation("com.github.kotlin-inquirer:kotlin-inquirer:0.1.0")
+    implementation("com.github.kotlin-inquirer:kotlin-inquirer:0.0.2-alpha")
     implementation("com.github.ajalt.mordant:mordant:2.7.1")
     implementation("com.github.ajalt.clikt:clikt:4.4.0")
     implementation("com.jakewharton.picnic:picnic:0.7.0")

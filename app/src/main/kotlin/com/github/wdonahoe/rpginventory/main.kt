@@ -3,8 +3,8 @@ package com.github.wdonahoe.rpginventory
 import com.github.ajalt.clikt.core.subcommands
 import com.github.ajalt.mordant.rendering.TextColors
 import com.github.ajalt.mordant.terminal.Terminal
-import com.github.kinquirer.KInquirer
-import com.github.kinquirer.components.promptInput
+import com.yg.kotlin.inquirer.components.promptInput
+import com.yg.kotlin.inquirer.core.KInquirer
 import com.github.wdonahoe.rpginventory.service.ImportExportService
 import com.github.wdonahoe.rpginventory.service.InventoryFileService
 import com.github.wdonahoe.rpginventory.service.RecipeFileService
